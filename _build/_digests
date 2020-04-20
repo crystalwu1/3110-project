@@ -1,7 +1,0 @@
-"Rule: ocaml: ml -> cmo & cmi (%=board )": "\025A\016\246\006w\022ab\142}\221<\128^\162"
-"Rule: ocaml: cmo* -> byte (%=main )": "\234$\165\127\024\241\236\183\031w\194\154\134\025\186\228"
-"Rule: ocaml: ml -> cmo & cmi (%=main )": "\156\"E'\025\173\206\002\203\t\236\236%]\231`"
-"Rule: ocaml dependencies ml (%=main )": "\002\176\174i\152\231c\144+\188\142dc~\175\173"
-"Resource: /Users/crystalwu/Desktop/cs3110/3110-project/board.ml": "[\217(\207\234Y\129\137\228\249v\244\028q\206<"
-"Resource: /Users/crystalwu/Desktop/cs3110/3110-project/main.ml": "#\020^\127\249\162\199\241]Z\172s\230\179\247\173"
-"Rule: ocaml dependencies ml (%=board )": "\166\249\211\127 \238D\186\003\178\226l]\210KJ"
