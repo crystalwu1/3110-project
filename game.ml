@@ -1,6 +1,9 @@
 open Yojson.Basic.Util
 
-type coordinate = (int * int)
+type coordinate = {
+  x : int;
+  y : int 
+}
 
 type orientation = {
   orient_name : string;
@@ -11,12 +14,19 @@ type shape = {
   shape_name : string;
   color : int;
   orientations : orientation list;
+  coordinate : coordinate;
 }
 
 type t = {
   shapes : shape list
 }
 
+let coordinates_of_json j = {
+  x = j |> member "x" |> to_int;
+  y = j |> member "y" |> to_int;
+}
+
 let orientation_of_json j = {
-  orient_name = j |> member "";
+  orient_name = j |> member "oname" |> to_string;
+  coordinates = j |> member "coordinates" |> List.map coordinates_of_json;
 }
