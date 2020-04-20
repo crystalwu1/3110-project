@@ -1,12 +1,30 @@
 ### Starting build.
-# Target: main.ml.depends, tags: { package(graphics), extension:ml, file:main.ml, ocaml, ocamldep, quiet, traverse }
-ocamlfind ocamldep -package graphics -modules main.ml > main.ml.depends
-# Target: board.ml.depends, tags: { package(graphics), extension:ml, file:board.ml, ocaml, ocamldep, quiet, traverse }
-ocamlfind ocamldep -package graphics -modules board.ml > board.ml.depends
-# Target: board.cmo, tags: { package(graphics), byte, compile, extension:cmo, extension:ml, file:board.cmo, file:board.ml, implem, ocaml, quiet, traverse }
-ocamlfind ocamlc -c -package graphics -o board.cmo board.ml
-# Target: main.cmo, tags: { package(graphics), byte, compile, extension:cmo, extension:ml, file:main.cmo, file:main.ml, implem, ocaml, quiet, traverse }
-ocamlfind ocamlc -c -package graphics -o main.cmo main.ml
-# Target: main.byte, tags: { package(graphics), byte, dont_link_with, extension:byte, file:main.byte, link, ocaml, program, quiet, traverse }
-ocamlfind ocamlc -linkpkg -package graphics board.cmo main.cmo -o main.byte
-# Compilation successful.
+# Target: board.mli.depends, tags: { package(graphics), package(yojson), extension:mli, file:board.mli, ocaml, ocamldep, quiet, traverse }
+ocamlfind ocamldep -package yojson -package graphics -modules board.mli > board.mli.depends
+# Target: board.cmi, tags: { package(graphics), package(yojson), byte, compile, extension:mli, file:board.mli, interf, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -package yojson -package graphics -o board.cmi board.mli
+# Target: board.ml.depends, tags: { package(graphics), package(yojson), extension:ml, file:board.ml, ocaml, ocamldep, quiet, traverse }
+ocamlfind ocamldep -package yojson -package graphics -modules board.ml > board.ml.depends
+# Target: board.cmo, tags: { package(graphics), package(yojson), byte, compile, extension:cmo, extension:ml, file:board.cmo, file:board.ml, implem, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -package yojson -package graphics -o board.cmo board.ml
+# Target: game.ml.depends, tags: { package(graphics), package(yojson), extension:ml, file:game.ml, ocaml, ocamldep, quiet, traverse }
+ocamlfind ocamldep -package yojson -package graphics -modules game.ml > game.ml.depends
+# Target: game.cmo, tags: { package(graphics), package(yojson), byte, compile, extension:cmo, extension:ml, file:game.cmo, file:game.ml, implem, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -package yojson -package graphics -o game.cmo game.ml
++ ocamlfind ocamlc -c -package yojson -package graphics -o game.cmo game.ml
+File "game.ml", line 30, characters 45-73:
+30 |   coordinates = j |> member "coordinates" |> List.map coordinates_of_json;
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error: This expression has type Yojson.Basic.t list -> coordinate list
+       but an expression was expected of type Yojson.Basic.t -> 'a
+       Type Yojson.Basic.t list is not compatible with type
+         Yojson.Basic.t =
+           [ `Assoc of (string * Yojson.Basic.t) list
+           | `Bool of bool
+           | `Float of float
+           | `Int of int
+           | `List of Yojson.Basic.t list
+           | `Null
+           | `String of string ] 
+Command exited with code 2.
+# Compilation unsuccessful.

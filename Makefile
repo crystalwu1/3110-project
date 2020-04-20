@@ -1,10 +1,10 @@
-MODULES=adventure command state main author
+MODULES= board game main state
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
 TEST=test.byte
 MAIN=main.byte
-OCAMLBUILD=ocamlbuild -pkg graphics -r -use-ocamlfind
+OCAMLBUILD=ocamlbuild -pkg graphics -pkg yojson -r -use-ocamlfind
 
 default: build
 	utop

@@ -40,7 +40,7 @@ let timer () =
   failwith ""
 
 let make_window () = 
-  open_graph " 500x800";
+  open_graph " 600x800";
   set_window_title "tetris";
   clear_window black;
   create_board ();

@@ -28,12 +28,19 @@ let create_board () =
   grid_helper 0 10 boardw 0 0 tilesize;
 
   set_color lightgrey;
-
   lineto startx (starty+boardh);
   lineto (startx+boardw) (starty+boardh);
   lineto (startx+boardw) starty;
   lineto startx starty
 
-let make_background () = 
+let directions () = 
+  failwith ""
+
+let timer () = 
+  failwith ""
+
+let make_window () = 
+  open_graph " 600x800";
+  set_window_title "tetris";
   clear_window black;
   create_board ();
