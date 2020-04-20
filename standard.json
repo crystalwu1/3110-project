@@ -2,6 +2,7 @@
   "tiles": [
     {
       "name": "long",
+      "color": "0x0F9AD7",
       "orientation1": [
         {
           "x": -2,
@@ -77,6 +78,7 @@
     },
     {
       "name": "square",
+      "color": "0xE39F00",
       "orientation1": [
         {
           "x": -1,
