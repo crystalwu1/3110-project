@@ -7,6 +7,7 @@ let rec read_helper () =
 
 let main () = 
   Graphics.open_graph "";
+  set_window_title "tetris";
   read_helper ()
 
 let () = main ()
