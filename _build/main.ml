@@ -1,4 +1,5 @@
 open Graphics
+open Board
 
 let rec read_helper () =
   match read_line () with
@@ -6,8 +7,9 @@ let rec read_helper () =
   | _ -> ()
 
 let main () = 
-  Graphics.open_graph "";
+  open_graph " 500x800";
   set_window_title "tetris";
+  make_background ();
   read_helper ()
 
 let () = main ()
