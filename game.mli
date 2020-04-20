@@ -4,6 +4,10 @@
    in game setting such as tile shape, color, and possible rotating positions.
 *)
 
+type coordinate
+
+type shape
+
 (** type of orientation names *)
 type orientation_name = string
 

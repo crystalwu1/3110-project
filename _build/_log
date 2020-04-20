@@ -1,30 +1,31 @@
 ### Starting build.
-# Target: board.mli.depends, tags: { package(graphics), package(yojson), extension:mli, file:board.mli, ocaml, ocamldep, quiet, traverse }
-ocamlfind ocamldep -package yojson -package graphics -modules board.mli > board.mli.depends
-# Target: board.cmi, tags: { package(graphics), package(yojson), byte, compile, extension:mli, file:board.mli, interf, ocaml, quiet, traverse }
-ocamlfind ocamlc -c -package yojson -package graphics -o board.cmi board.mli
-# Target: board.ml.depends, tags: { package(graphics), package(yojson), extension:ml, file:board.ml, ocaml, ocamldep, quiet, traverse }
-ocamlfind ocamldep -package yojson -package graphics -modules board.ml > board.ml.depends
-# Target: board.cmo, tags: { package(graphics), package(yojson), byte, compile, extension:cmo, extension:ml, file:board.cmo, file:board.ml, implem, ocaml, quiet, traverse }
-ocamlfind ocamlc -c -package yojson -package graphics -o board.cmo board.ml
-# Target: game.ml.depends, tags: { package(graphics), package(yojson), extension:ml, file:game.ml, ocaml, ocamldep, quiet, traverse }
-ocamlfind ocamldep -package yojson -package graphics -modules game.ml > game.ml.depends
-# Target: game.cmo, tags: { package(graphics), package(yojson), byte, compile, extension:cmo, extension:ml, file:game.cmo, file:game.ml, implem, ocaml, quiet, traverse }
-ocamlfind ocamlc -c -package yojson -package graphics -o game.cmo game.ml
-+ ocamlfind ocamlc -c -package yojson -package graphics -o game.cmo game.ml
-File "game.ml", line 30, characters 45-73:
-30 |   coordinates = j |> member "coordinates" |> List.map coordinates_of_json;
-                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: This expression has type Yojson.Basic.t list -> coordinate list
-       but an expression was expected of type Yojson.Basic.t -> 'a
-       Type Yojson.Basic.t list is not compatible with type
-         Yojson.Basic.t =
-           [ `Assoc of (string * Yojson.Basic.t) list
-           | `Bool of bool
-           | `Float of float
-           | `Int of int
-           | `List of Yojson.Basic.t list
-           | `Null
-           | `String of string ] 
+# Target: board.mli.depends, tags: { package(ANSITerminal), package(graphics), package(oUnit), package(yojson), extension:mli, file:board.mli, ocaml, ocamldep, quiet, traverse }
+ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -package graphics -modules board.mli > board.mli.depends # cached
+# Target: board.cmi, tags: { package(ANSITerminal), package(graphics), package(oUnit), package(yojson), byte, compile, extension:mli, file:board.mli, interf, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -package oUnit -package yojson -package ANSITerminal -package graphics -o board.cmi board.mli # cached
+# Target: board.ml.depends, tags: { package(ANSITerminal), package(graphics), package(oUnit), package(yojson), extension:ml, file:board.ml, ocaml, ocamldep, quiet, traverse }
+ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -package graphics -modules board.ml > board.ml.depends # cached
+# Target: board.cmo, tags: { package(ANSITerminal), package(graphics), package(oUnit), package(yojson), byte, compile, extension:cmo, extension:ml, file:board.cmo, file:board.ml, implem, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -package oUnit -package yojson -package ANSITerminal -package graphics -o board.cmo board.ml # cached
+# Target: game.mli.depends, tags: { package(ANSITerminal), package(graphics), package(oUnit), package(yojson), extension:mli, file:game.mli, ocaml, ocamldep, quiet, traverse }
+ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -package graphics -modules game.mli > game.mli.depends # cached
+# Target: game.cmi, tags: { package(ANSITerminal), package(graphics), package(oUnit), package(yojson), byte, compile, extension:mli, file:game.mli, interf, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -package oUnit -package yojson -package ANSITerminal -package graphics -o game.cmi game.mli # cached
+# Target: game.ml.depends, tags: { package(ANSITerminal), package(graphics), package(oUnit), package(yojson), extension:ml, file:game.ml, ocaml, ocamldep, quiet, traverse }
+ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -package graphics -modules game.ml > game.ml.depends # cached
+# Target: game.cmo, tags: { package(ANSITerminal), package(graphics), package(oUnit), package(yojson), byte, compile, extension:cmo, extension:ml, file:game.cmo, file:game.ml, implem, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -package oUnit -package yojson -package ANSITerminal -package graphics -o game.cmo game.ml # cached
+# Target: main.ml.depends, tags: { package(ANSITerminal), package(graphics), package(oUnit), package(yojson), extension:ml, file:main.ml, ocaml, ocamldep, quiet, traverse }
+ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -package graphics -modules main.ml > main.ml.depends # cached
+# Target: state.ml.depends, tags: { package(ANSITerminal), package(graphics), package(oUnit), package(yojson), extension:ml, file:state.ml, ocaml, ocamldep, quiet, traverse }
+ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -package graphics -modules state.ml > state.ml.depends
+# Target: state.cmo, tags: { package(ANSITerminal), package(graphics), package(oUnit), package(yojson), byte, compile, extension:cmo, extension:ml, file:state.cmo, file:state.ml, implem, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -package oUnit -package yojson -package ANSITerminal -package graphics -o state.cmo state.ml
++ ocamlfind ocamlc -c -package oUnit -package yojson -package ANSITerminal -package graphics -o state.cmo state.ml
+File "state.ml", line 15, characters 13-22:
+15 |   blockref = 200 * 700;
+                  ^^^^^^^^^
+Error: This expression has type int but an expression was expected of type
+         int * int
 Command exited with code 2.
 # Compilation unsuccessful.

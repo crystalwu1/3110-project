@@ -1,13 +1,24 @@
 open Graphics
 open Board
-open Game
 
 type t = {
-  blockref : Game.coordinate; 
+  blockref : int * int; 
   moving_block : Game.shape;
   current_orientation : Game.coordinate;
   blocks : Game.coordinate list;
   time : int;
+  queue : Game.shape list;
+  won : bool;
+}
+
+let init_state = {
+  blockref = (200, 700);
+  moving_block = Null;
+  current_orientation = NULL;
+  blocks = [];
+  time = 0;
+  queue = [];
+  won = false;
 }
 
 let blockref_x st = 
@@ -17,6 +28,8 @@ let blockref_x st =
 let blockref_y st = 
   match st.blockref with
   | (_, y) -> y
+
+let won st = st.won
 
 (* renders the moving block *)
 let render_moving blk st= 
