@@ -33,6 +33,14 @@ let create_board () =
   lineto (startx+boardw) starty;
   lineto startx starty
 
-let make_background () = 
+let directions () = 
+  failwith ""
+
+let timer () = 
+  failwith ""
+
+let make_window () = 
+  open_graph " 500x800";
+  set_window_title "tetris";
   clear_window black;
   create_board ();

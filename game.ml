@@ -14,7 +14,6 @@ type shape = {
   shape_name : string;
   color : int;
   orientations : orientation list;
-  coordinate : coordinate;
 }
 
 type t = {
@@ -30,3 +29,10 @@ let orientation_of_json j = {
   orient_name = j |> member "oname" |> to_string;
   coordinates = j |> member "coordinates" |> List.map coordinates_of_json;
 }
+
+let shape_color shpe = 
+  failwith "Rachel todo"
+
+let shape_orientations shpe = 
+  failwith "Rachel todo"
+

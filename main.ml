@@ -7,9 +7,7 @@ let rec read_helper () =
   | _ -> ()
 
 let main () = 
-  open_graph " 500x800";
-  set_window_title "tetris";
-  make_background ();
+  make_window ();
   read_helper ()
 
 let () = main ()
