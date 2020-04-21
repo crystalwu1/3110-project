@@ -1,16 +1,16 @@
 open Graphics
 open Board
 open Game
-open State
+(* open State *)
 
 let rec read_helper () =
   match read_line () with
   | exception End_of_file -> ()
   | _ -> ()
 
-let rec run_game adv st = if won st then () else run_game adv (update st)
+(* let rec run_game adv st = if won st then () else run_game adv (update st) *)
 
-let start_game f = let adventure = f |>  Yojson.Basic.from_file |> parse in run_game
+let start_game f = let adventure = f |>  Yojson.Basic.from_file |> parse in ()
 
 let main () = 
   ANSITerminal.(print_string [red]
