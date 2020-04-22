@@ -3,8 +3,8 @@ open Board
 
 type t = {
   blockref : int * int; 
-  moving_block : Game.shape;
-  current_orientation : Game.coordinate;
+  moving_block : Game.shape option;
+  current_orientation : Game.coordinate option;
   blocks : Game.coordinate list;
   time : int;
   queue : Game.shape list;
@@ -13,8 +13,8 @@ type t = {
 
 let init_state = {
   blockref = (200, 700);
-  moving_block = Null;
-  current_orientation = Null;
+  moving_block = None;
+  current_orientation = None;
   blocks = [];
   time = 0;
   queue = [];
@@ -53,14 +53,20 @@ let rec helper coords =
         (st.moving_block |> shape_orientations |> List.map (fun x -> x.coordinates))
 
 let update st = 
+  if st.moving_block = None then 
+    (* choose a random block and orientation  *)
+    () 
+  else 
+    (* move the block down *)
+    (* check for user input *)
+    ()
 
+(* idea: when the block hits the ground and is no longer the moving_block, 
+   deconstruct the block into separate squares *)
 
-  (* idea: when the block hits the ground and is no longer the moving_block, 
-     deconstruct the block into separate squares *)
+(* how are we going to check the state of the board? like how will we 
+   know when the cells are filled? *)
 
-  (* how are we going to check the state of the board? like how will we 
-     know when the cells are filled? *)
-
-  (* changes the orientations of the moving_block *)
-  let rotate = 
-    failwith ""
+(* changes the orientations of the moving_block *)
+let rotate = 
+  failwith ""
