@@ -101,20 +101,32 @@ let drop =
   failwith ""
 
 let move direction st =
-  if direction = "right" then 
-    match st.blockref with 
-    | (x,y) -> (x+1, y)
+  if direction = "right" then let new_shape = {
+      blockref = add_blockref st (-1) 0;
+      moving_block = st.moving_block;
+      current_orientation = st.current_orientation;
+      blocks = st.blocks;
+      time = st.time;
+      queue = st.queue;
+      won = st.won;
+      dropped= st.dropped;} in
   else if direction = "left" then    
-    match st.blockref with 
-    | (x,y) -> (x-1, y)
+    let new_shape = {
+      blockref = add_blockref st 1 0;
+      moving_block = st.moving_block;
+      current_orientation = st.current_orientation;
+      blocks = st.blocks;
+      time = st.time;
+      queue = st.queue;
+      won = st.won;
+      dropped= st.dropped;} 
 
 (** [find_lowest_y_helper] finds the index of the top most element 
-    in [column] with a value greater than 0 starting at the top 
-    point of [idx] *)
+    in [column] at [idx] and lower with a value greater than 0 *)
 let rec find_lowest_y_helper column idx = 
-  match column.(idk) with
-  | n when n > 0 -> idk
+  match column.(idx) with
+  | n when n > 0 -> idx
   | _ -> find_lowest_y_helper column (idx-1)
 
 let find_lowest_y dropped column =
-  find_lowest_y_helper dropped.(x) 19
+  find_lowest_y_helper dropped.(column) 19
