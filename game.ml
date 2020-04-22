@@ -27,7 +27,7 @@ type t = {
   shapes : shape list
 }
 
-(** [coordinates_of_json] is a record of a coordinate from [j] *)
+(** [coordinates_of_json] is a record of ao coordinate from [j] *)
 let coordinates_of_json j = {
   x = j |> member "x" |> to_int;
   y = j |> member "y" |> to_int;
@@ -52,15 +52,44 @@ let game_of_json j = {
 }
 
 let parse j =
-  try game_of_json j
+  try game_of_json j 
   with Type_error (s, _) -> failwith ("Parsing error: " ^ s)
 
 let shape_color shpe = 
-  shpe.color
+  match shpe with 
+  | None -> 0
+  | Some thing -> thing.color
 
 let shape_orientations shpe = 
-  shpe.orientations
+  match shpe with 
+  | None -> []
+  | Some thing -> thing.orientations
 
 let orientation_coordinates orient =
-  orient.coordinates
+  match orient with 
+  | None -> []
+  | Some thing -> thing.coordinates
+
+let coord_x coord = coord.x
+
+let coord_y coord = coord.y
+
+(** [rand_helper] is the [shape] in [shapes] at index [idx]. 
+    Raises error if [idx] is too larger to index into [shapes] *)
+let rec rand_helper shapes idx = 
+  match shapes, idx with
+  | h::t, x when x = 0 -> h
+  | h::t, _ -> rand_helper t (idx-1)
+  | [], _ -> failwith ("error with random shape indexing")
+
+let rand_shape t = 
+  let shapes = t.shapes in
+  let length = List.length shapes in
+  let idx = Random.int length in
+  rand_helper shapes idx
+
+let orientation_init shpe = 
+  match shpe.orientations with
+  | [] -> None
+  | h::t -> Some h
 

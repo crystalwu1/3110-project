@@ -37,7 +37,7 @@ let directions () =
   failwith ""
 
 let timer () = 
-  failwith ""
+  Sys.time()
 
 let make_window () = 
   open_graph " 600x800";

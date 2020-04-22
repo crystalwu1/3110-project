@@ -23,8 +23,17 @@ type t
     Raises [Type_error] when [j] is a wrong type of json element] *)
 val parse : Yojson.Basic.t -> t
 
-val shape_color : shape -> int
+val shape_color : shape option -> int
 
-val shape_orientations : shape -> orientation list
+val shape_orientations : shape option -> orientation list
 
-val orientation_coordinates : orientation -> coordinate list 
+val orientation_coordinates : orientation option -> coordinate list 
+
+val coord_x : coordinate -> int
+
+val coord_y : coordinate -> int
+
+(** [rand_shape] is a random [shape] in tetris game [t] *)
+val rand_shape : t -> shape
+
+val orientation_init : shape -> orientation option

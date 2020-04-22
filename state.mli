@@ -6,16 +6,16 @@ type t
 
 val init_state : Game.t -> t
 
-val blockref_x
+val blockref_x : t -> int
 
-val blockref_y 
+val blockref_y : t -> int
 
-val add_blockref 
+val add_blockref : t -> int -> int -> int * int
 
-val won : st -> bool
+val won : t -> bool
 
-val render_moving 
+val render_moving : t -> unit
 
-val update : t-> 
+val update : t -> Game.t -> t
 
-val rotate 
+val rotate : string -> int -> unit

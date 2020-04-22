@@ -8,9 +8,10 @@ let rec read_helper () =
   | exception End_of_file -> ()
   | _ -> ()
 
-let rec run_game st adv = if won st then () else run_game adv (update st)
+let rec run_game st adv = if won st then () else run_game (update st adv) adv
 
-let start_game f = let adventure = f |>  Yojson.Basic.from_file |> parse in run_game init_state
+let start_game f = let adventure = f |>  Yojson.Basic.from_file |> parse in 
+  run_game (init_state adventure) adventure
 
 let main () = 
   ANSITerminal.(print_string [red]
