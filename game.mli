@@ -20,3 +20,7 @@ type t
 (** [parse j] is a record of a tetirs game from [j]
     Raises [Type_error] when [j] is a wrong type of json element] *)
 val parse : Yojson.Basic.t -> t
+
+val shape_color : shape -> int
+
+val shape_orientations : shape -> orientation list
