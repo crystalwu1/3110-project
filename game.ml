@@ -56,8 +56,11 @@ let parse j =
   with Type_error (s, _) -> failwith ("Parsing error: " ^ s)
 
 let shape_color shpe = 
-  failwith "Rachel todo"
+  shpe.color
 
 let shape_orientations shpe = 
-  failwith "Rachel todo"
+  shpe.orientations
+
+let orientation_coordinates orient =
+  orient.coordinates
 
