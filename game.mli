@@ -8,6 +8,8 @@ type coordinate
 
 type shape
 
+type orientation
+
 (** type of orientation names *)
 type orientation_name = string
 
@@ -24,3 +26,5 @@ val parse : Yojson.Basic.t -> t
 val shape_color : shape -> int
 
 val shape_orientations : shape -> orientation list
+
+val orientation_coordinates : orientation -> coordinate list 

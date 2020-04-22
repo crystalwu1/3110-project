@@ -41,16 +41,16 @@ let rec helper coords =
        rlineto (-tilesize) 0;
        rlineto 0 (-tilesize); *)
     draw_rect (refx+x*tilesize) (refy+y*tilesize) tilesize tilesize;
-    helper t;
+    helper t
 
-    (* renders the moving block *)
-    let render_moving blk st= 
-      let refx = blockref_x st in
-      let refy = blockref_y st in 
-      let color = shape_color st.moving_block
-      in set_color color; helper 
-        (* is this ok or should we have more getters? *)
-        (st.moving_block |> shape_orientations |> List.map (fun x -> x.coordinates))
+(* renders the moving block *)
+let render_moving blk st= 
+  let refx = blockref_x st in
+  let refy = blockref_y st in 
+  let color = shape_color st.moving_block
+  in set_color color; helper 
+    (* is this ok or should we have more getters? *)
+    (st.moving_block |> shape_orientations |> List.map (fun x -> x.coordinates))
 
 let update st = 
   if st.moving_block = None then 
