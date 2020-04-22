@@ -100,7 +100,21 @@ let rotate string int =
 let drop = 
   failwith ""
 
-let move =
-  failwith ""
+let move direction st =
+  if direction = "right" then 
+    match st.blockref with 
+    | (x,y) -> (x+1, y)
+  else if direction = "left" then    
+    match st.blockref with 
+    | (x,y) -> (x-1, y)
 
-let find_lowest_y dropped x =
+(** [find_lowest_y_helper] finds the index of the top most element 
+    in [column] with a value greater than 0 starting at the top 
+    point of [idx] *)
+let rec find_lowest_y_helper column idx = 
+  match column.(idk) with
+  | n when n > 0 -> idk
+  | _ -> find_lowest_y_helper column (idx-1)
+
+let find_lowest_y dropped column =
+  find_lowest_y_helper dropped.(x) 19
