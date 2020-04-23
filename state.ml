@@ -95,7 +95,6 @@ let result =
       animate = 0;
     }
   else (
-    
     {
        blockref = if st.animate = 1000 then add_blockref st 0 (-tilesize) else st.blockref;
        moving_block = st.moving_block;
@@ -121,10 +120,39 @@ let result =
 let rotate string int = 
   (* failwith "" *) ()
 
-(* let drop = 
+(* let drop () = 
   failwith "" *)
 
-(* let move =
-  failwith "" *)
+let move direction st =
+  if direction = "right" then 
+  let new_shape = {
+      blockref = add_blockref st (-1) 0;
+      moving_block = st.moving_block;
+      current_orientation = st.current_orientation;
+      blocks = st.blocks;
+      time = st.time;
+      queue = st.queue;
+      won = st.won;
+      dropped= st.dropped;
+      animate = st.animate } in new_shape
+  else  
+    let new_shape = {
+      blockref = add_blockref st 1 0;
+      moving_block = st.moving_block;
+      current_orientation = st.current_orientation;
+      blocks = st.blocks;
+      time = st.time;
+      queue = st.queue;
+      won = st.won;
+      dropped= st.dropped;
+      animate = st.animate } in new_shape 
 
-(* let find_lowest_y dropped x = *)
+(** [find_lowest_y_helper] finds the index of the top most element 
+    in [column] at [idx] and lower with a value greater than 0 *)
+let rec find_lowest_y_helper column idx = 
+  match column.(idx) with
+  | n when n > 0 -> idx
+  | _ -> find_lowest_y_helper column (idx-1)
+
+let find_lowest_y dropped column =
+  find_lowest_y_helper dropped.(column) 19
