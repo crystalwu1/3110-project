@@ -95,6 +95,7 @@ let result =
       animate = 0;
     }
   else (
+    
     {
        blockref = if st.animate = 1000 then add_blockref st 0 (-tilesize) else st.blockref;
        moving_block = st.moving_block;
@@ -120,7 +121,7 @@ let result =
 let rotate string int = 
   (* failwith "" *) ()
 
-(* let drop () = 
+(* let drop = 
   failwith "" *)
 
 let move direction st =
