@@ -27,7 +27,7 @@ let create_board () =
   grid_helper 0 5 0 boardh tilesize 0;
   grid_helper 0 10 boardw 0 0 tilesize;
 
-  set_color lightgrey;
+  set_color darkgrey;
   lineto startx (starty+boardh);
   lineto (startx+boardw) (starty+boardh);
   lineto (startx+boardw) starty;
