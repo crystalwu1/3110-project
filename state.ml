@@ -127,7 +127,7 @@ let rotate string int =
 let move direction st =
   if direction = "right" then 
   let new_shape = {
-      blockref = add_blockref st (-1) 0;
+      blockref = add_blockref st (tilesize) 0;
       moving_block = st.moving_block;
       current_orientation = st.current_orientation;
       blocks = st.blocks;
@@ -138,7 +138,7 @@ let move direction st =
       animate = st.animate } in new_shape
   else  
     let new_shape = {
-      blockref = add_blockref st 1 0;
+      blockref = add_blockref st tilesize 0;
       moving_block = st.moving_block;
       current_orientation = st.current_orientation;
       blocks = st.blocks;
