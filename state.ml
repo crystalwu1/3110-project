@@ -31,7 +31,7 @@ let init_state t = {
   queue = init_q 5 [] t;
   won = false;
   dropped = Array.make_matrix 10 20 0;
-  animate = 0;
+  animate = 1;
   rows_left = 40; 
   (* ^ we can chane this to a user input at some point *)
 }
@@ -90,7 +90,6 @@ let rec render_array dropped x y  =
 let erase_moving st = 
   let refx = blockref_x st in
   let refy = blockref_y st in 
-  let color = shape_color st.moving_block in
   let rec helper coords =
     match coords with
     | [] -> ()
@@ -117,10 +116,9 @@ let erase_time st =
   set_color black;
   fill_rect 400 600 30 100  
 
-let pop queue = 
+let pop queue adv = 
   match queue with 
-  | [] -> (None, [])
-  | x::t -> (Some x, t)
+  | x::t -> (x, (rand_shape adv :: t))
 
 (** [find_lowest_y_helper] finds the index of the top most element 
     in [column] at [idx] and lower with a value greater than 0 *)
@@ -206,33 +204,33 @@ let row_remove st =
 let update adv st= 
   let result = 
     if st.moving_block = None then 
-      let (new_shape, new_queue) = pop st.queue in 
+      let (new_shape, new_queue) = pop st.queue adv in 
       {
         blockref = st.blockref;
-        moving_block = new_shape;
+        moving_block = Some new_shape;
         current_orientation = orientation_init new_shape;
         time = st.time;
         queue = new_queue;
         won = st.won;
         dropped = st.dropped;
-        animate = 0;
+        animate = st.animate;
         rows_left = st.rows_left;
       }
     else (
-
       {
-        blockref = if st.animate mod 10000 = 0 then add_blockref st 0 (-tilesize) else st.blockref;
+        blockref = if st.animate mod 100 = 0 then add_blockref st 0 (-tilesize) else st.blockref;
         moving_block = st.moving_block;
         current_orientation = st.current_orientation;
         time = st.time;
         queue = st.queue;
         won = st.won;
         dropped= st.dropped;
-        animate = if st.animate mod 10000 = 0 then 0 else st.animate +1;
+        animate = if st.animate mod 100 = 0 then 1 else st.animate +1;
         rows_left = st.rows_left;
       }) in 
-  if st.animate mod 10000  = 0 then erase_moving st;
-  if st.animate mod 7500 = 0 then erase_time st;
+  if st.animate mod 100 = 0 then erase_moving st;
+  print_endline (string_of_bool (st.animate=100));
+  (* if st.animate mod 7500 = 0 then erase_time st; *)
   render_time result;
   render_moving result; 
   result
@@ -249,7 +247,7 @@ let rotate string st =
       animate = st.animate;
       rows_left = st.rows_left;
       current_orientation = 
-        le  t rec next_orientation list = 
+        let rec next_orientation list = 
         match list with 
         | [] -> failwith "no orientation"
         |     h::[] -> if Some h = st.current_orientation 
@@ -269,7 +267,7 @@ else
     animate = st.animate;
     rows_left = st.rows_left;
     current_orientation = 
-      le    t rec next_orientation list = 
+      let rec next_orientation list = 
       match list with 
       | [] -> failwith "no orientation"
       |  h::[] -> if Some h = st.current_orientation 
@@ -289,7 +287,7 @@ let move direction st =
       won = st.won;
       dropped= st.dropped;
       animate = st.animate;
-      rows_left = st.rows_left } in new_shape
+      rows_left = st.rows_left } in erase_moving st; new_shape
   else  
     let new_shape = {
       blockref = add_blockref st (-tilesize) 0;
@@ -300,11 +298,11 @@ let move direction st =
       won = st.won;
       dropped = st.dropped;
       animate = st.animate;
-      rows_left = st.rows_left } in new_shape 
+      rows_left = st.rows_left } in erase_moving st; new_shape 
 
 let drop st = 
   let coords = orientation_coordinates st.current_orientation in
-  let (x, y) = (scan_width st coords 0) in
+  let (x, y) = (scan_width st coords (0, 0)) in
   let color = shape_color st.moving_block in
   add_dropped_block st.dropped x y coords color;
   {
@@ -316,10 +314,5 @@ let drop st =
     won = st.won;
     dropped= st.dropped;
     animate = st.animate;
-    time = st.time;
-    queue = st.queue;
-    won = st.won;
-    dropped = st.dropped;
-    animate = st.animate;
-    rows_left = st.rows_left - new_rows_removed;
+    rows_left = st.rows_left;
   }

@@ -12,7 +12,8 @@ let rec read_helper () =
 let rec run_game adv st  = 
   (* print_endline "running"; *)
   if won st then ()  
-  else keyboard st |> update adv |> run_game adv
+  else try let x = keyboard st in x |> update adv |> run_game adv with 
+  | NoKeyPress -> run_game adv (update adv st)
 
 let start_game f = let adventure = f |>  Yojson.Basic.from_file |> parse in 
   run_game adventure (init_state adventure) 
