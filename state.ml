@@ -3,12 +3,12 @@ open Board
 open Game
 
 let darkgrey = rgb 40 40 40
+let orig_blockref = (200, 670)
 
 type t = {
   blockref : int * int; 
   moving_block : Game.shape option;
   current_orientation : Game.orientation option;
-  blocks : Game.coordinate list;
   time : int;
   queue : Game.shape list;
   won : bool;
@@ -23,10 +23,9 @@ let rec init_q length acc t =
   | _ -> init_q (length-1) ((rand_shape t)::acc) t
 
 let init_state t = {
-  blockref = (200, 670);
+  blockref = orig_blockref;
   moving_block = None;
   current_orientation = None;
-  blocks = [];
   time = 0;
   queue = init_q 5 [] t;
   won = false;
@@ -99,7 +98,6 @@ let update st adv=
         blockref = st.blockref;
         moving_block = Some new_shape;
         current_orientation = orientation_init new_shape;
-        blocks = st.blocks;
         time = st.time;
         queue = st.queue;
         won = st.won;
@@ -113,7 +111,6 @@ let update st adv=
         blockref = if st.animate mod 10000 = 0 then add_blockref st 0 (-tilesize) else st.blockref;
         moving_block = st.moving_block;
         current_orientation = st.current_orientation;
-        blocks = st.blocks;
         time = st.time;
         queue = st.queue;
         won = st.won;
@@ -127,47 +124,75 @@ let update st adv=
   render_moving result; 
   result
 
-(* idea: when the block hits the ground and is no longer the moving_block, 
-   deconstruct the block into separate squares *)
-
-(* how are we going to check the state of the board? like how will we 
-   know when the cells are filled? *)
-
 (* changes the orientations of the moving_block *)
 let rotate string st = 
   if string = "clockwise" then 
     let new_shape = {
       blockref = add_blockref st 0 0;
       moving_block = st.moving_block;
-      blocks = st.blocks;
       time = st.time;
       queue = st.queue;
       won = st.won;
       dropped= st.dropped;
       animate = st.animate;
       rows_left = st.rows_left;
-      current_orientation = begin
-        match st.shape_orientations with 
-        | st.current_orientation -> st.current_orientation
-        | _ -> st.current_orientation
-        (* match st.current_orientation with  *)
-      end;
+      current_orientation = 
+        let rec next_orientation list = 
+          match list with 
+          | [] -> failwith "no orientation"
+          | h::[] -> if Some h = st.current_orientation 
+            then Some (List.hd (list)) else failwith "no orientation"
+          | h::t -> if Some h = st.current_orientation 
+            then Some (List.hd (t)) else next_orientation t in
+        next_orientation (shape_orientations (st.moving_block));
     } in new_shape 
   else 
     let new_shape = {
       blockref = add_blockref st 0 0;
       moving_block = st.moving_block;
-      current_orientation = st.current_orientation;
-      blocks = st.blocks;
       time = st.time;
       queue = st.queue;
       won = st.won;
       dropped= st.dropped;
       animate = st.animate;
-      rows_left = st.rows_left;} in new_shape
+      rows_left = st.rows_left;
+      current_orientation = 
+        let rec next_orientation list = 
+          match list with 
+          | [] -> failwith "no orientation"
+          | h::[] -> if Some h = st.current_orientation 
+            then Some (List.nth list 3) else failwith "no orientation"
+          | h::t -> if Some h = st.current_orientation 
+            then Some (List.hd (List.rev t)) else next_orientation t in
+        next_orientation (shape_orientations (st.moving_block));} in new_shape
 
-(* let drop = 
-   failwith "" *)
+let rec scan_width st orient acc=
+  match orient with
+  | [] -> acc
+  | h::t -> (((blockref_x st) - (blockref_x st) mod 10)/10+(coord_x h))
+
+let drop st = 
+  let temp_state = {
+    blockref = add_blockref st 0 0;
+    moving_block = None;
+    current_orientation = None;
+    time = st.time;
+    queue = st.queue;
+    won = st.won;
+    dropped= st.dropped;
+    animate = st.animate;
+    rows_left = st.rows_left }
+  in
+  {
+    blockref = orig_blockref;
+    moving_block = None;
+    current_orientation = None;
+    time = st.time;
+    queue = st.queue;
+    won = st.won;
+    dropped= st.dropped;
+    animate = st.animate;
+    rows_left = st.rows_left }
 
 let move direction st =
   if direction = "right" then 
@@ -175,7 +200,6 @@ let move direction st =
       blockref = add_blockref st tilesize 0;
       moving_block = st.moving_block;
       current_orientation = st.current_orientation;
-      blocks = st.blocks;
       time = st.time;
       queue = st.queue;
       won = st.won;
@@ -187,7 +211,6 @@ let move direction st =
       blockref = add_blockref st (-tilesize) 0;
       moving_block = st.moving_block;
       current_orientation = st.current_orientation;
-      blocks = st.blocks;
       time = st.time;
       queue = st.queue;
       won = st.won;
@@ -208,17 +231,28 @@ let find_lowest_y dropped column =
 (** [row_check] returns true if the entire row starting at position [x] 
     at height [y] is nonzero and false otherwise *)
 let rec row_check dropped y x =
-  if dropped.(y).(x) > 0 then 
+  if dropped.(x).(y) > 0 then 
     if x = 9 then true
     else row_check dropped y (x+1)
 
+(** [make_val] sets the element at position ([x], [y]) in the 
+    array [dropped] to [value] *)
+let make_val dropped y x value = 
+  dropped.(x).(y) <- value
+
+(** [rem_row] *)
 let rec rem_row dropped y x =
+  if y = 19 then
+    if x = 9 then make_val dropped y x 0
+    else make_val dropped y x 0; rem_row dropped y (x+1)
+else 
+if x = 9 then make_val dropped y x dropped.(x).(y+1); rem_row dropped (y+1) 0
+else make_val dropped y x dropped.(x).(y+1); rem_row dropped y (x+1)
 
+let rec row_remove_helper rows dropped pos = 
+  5
 
-  let rec row_remove_helper rows dropped pos = 
-
-
-    let row_remove st =
-      let new_rows_left = st.rows_left in
-      let new_dropped = st.dropped in
-      let result = row_remove_helper new_rows_left new_dropped 0 in
+let row_remove st =
+  let new_rows_left = st.rows_left in
+  let new_dropped = st.dropped in
+  let result = row_remove_helper new_rows_left new_dropped 0 in
