@@ -182,7 +182,7 @@
     },
     {
       "name": "s-block",
-      "color": "0xE39F00",
+      "color": "0x58B103",
       "orientations": [
         {
           "oname": "orientation1",
@@ -272,7 +272,7 @@
     },
     {
       "name": "z-block",
-      "color": "0xE39F00",
+      "color": "0xD71037",
       "orientations": [
         {
           "oname": "orientation1",
@@ -362,7 +362,7 @@
     },
     {
       "name": "tee",
-      "color": "0xE39F00",
+      "color": "0xAF298B",
       "orientations": [
         {
           "oname": "orientation1",
@@ -452,7 +452,7 @@
     },
     {
       "name": "l-shape",
-      "color": "0xE39F00",
+      "color": "0xE35B02",
       "orientations": [
         {
           "oname": "orientation1",
@@ -541,8 +541,8 @@
       ]
     },
     {
-      "name": "t-shape",
-      "color": "0xE39F00",
+      "name": "j-shape",
+      "color": "0x2140C6",
       "orientations": [
         {
           "oname": "orientation1",
