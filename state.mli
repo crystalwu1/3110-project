@@ -14,6 +14,6 @@ val won : t -> bool
 
 val update : t -> Game.t -> t
 
-val rotate : string -> int -> unit
+val rotate : string -> t-> t
 
 val move : string -> t -> t

@@ -10,8 +10,9 @@ let keyboard st =
     | 'd' -> move "right" st
     | 'a' -> move "left" st
     | 'w' -> rotate "clockwise" 90
+    | 'x' -> rotate "counterclockwise" 90
     | 's' | ' ' -> drop 
-    | _ -> ignore
+    | _ -> failwith "not valid"
 
 
 
