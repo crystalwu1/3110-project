@@ -5,6 +5,8 @@ open Game
 let darkgrey = rgb 40 40 40
 let orig_blockref = (200, 670)
 
+exception NoMoreBlocks
+
 type t = {
   blockref : int * int; 
   moving_block : Game.shape option;
@@ -70,21 +72,26 @@ let render_moving st =
   set_color color; helper (orientation_coordinates st.current_orientation)
 
 (** [render_array] draws the dropped blocks in [st].*)
-let rec render_array dropped x y  = 
-  let color = dropped.(x).(y) in
-  set_color color;
-  if dropped.(x).(y) = 0 
-  then if (x=9 && y=19) 
-    then fill_rect x y tilesize tilesize 
-    else if y=19 
-    then render_array dropped (x+1) 0
-    else render_array dropped x (y+1)
-  else if (x=9 && y=19) 
-  then fill_rect x y tilesize tilesize
-  else if y=19 then (fill_rect x y tilesize tilesize; 
-                     render_array dropped (x+1) 0)
-  else fill_rect x y tilesize tilesize; render_array dropped x (y+1)
-
+let rec render_array dropped x y = 
+  if y > 19 
+  then () 
+  else (
+    if dropped.(x).(y) = 0 
+    then 
+      if (x=9 && y=19) 
+      then ()
+      else 
+        if y=19 
+        then render_array dropped (x+1) 0
+        else (render_array dropped x (y+1))
+    else 
+      if (x=9 && y=19) 
+      then fill_rect (x*tilesize+50) (y*tilesize+100) tilesize tilesize
+      else 
+        if y=19 
+        then (set_color dropped.(x).(y); fill_rect (x*tilesize+50) (y*tilesize+100) tilesize tilesize; render_array dropped (x+1) 0)
+        else (set_color dropped.(x).(y); fill_rect (x*tilesize+50) (y*tilesize+100) tilesize tilesize; render_array dropped x (y+1)
+  ))
 
 (** [erase_moving] redraws the background grid in the shape of the currently moving block in [st].*)
 let erase_moving st = 
@@ -119,10 +126,12 @@ let erase_time st =
 let pop queue adv = 
   match queue with 
   | x::t -> (x, (rand_shape adv :: t))
+  | [] -> raise NoMoreBlocks
 
 (** [find_lowest_y_helper] finds the index of the top most element 
     in [column] at [idx] and lower with a value greater than 0 *)
 let rec find_lowest_y_helper column idx = 
+  if idx < 0 then 0 else 
   match column.(idx) with
   | n when n > 0 -> idx
   | _ -> find_lowest_y_helper column (idx-1)
@@ -133,7 +142,8 @@ let find_lowest_y dropped column =
 let rec scan_width st orient acc=
   match orient with
   | [] -> acc
-  | h::t -> let col = ((blockref_x st) - ((blockref_x st) mod 10))/10+(coord_x h) in
+  | h::t -> let col = ((blockref_x st)-50)/tilesize+(coord_x h) in
+  (* print_endline (string_of_int col); *)
     let calc = find_lowest_y st.dropped col in
     match acc with
     | (x, _) -> scan_width st t (if calc > x then (calc, col) else acc)
@@ -229,35 +239,16 @@ let update adv st=
         rows_left = st.rows_left;
       }) in 
   if st.animate mod 100 = 0 then erase_moving st;
-  print_endline (string_of_bool (st.animate=100));
+  (* print_endline (string_of_bool (st.animate=100)); *)
   (* if st.animate mod 7500 = 0 then erase_time st; *)
   render_time result;
   render_moving result; 
   result
 
 let rotate string st = 
+  let new_shape = 
   if string = "clockwise" then 
-    let new_shape = {
-      blockref = add_blockref st 0 0;
-      moving_block = st.moving_block;
-      time = st.time;
-      queue = st.queue;
-      won = st.won;
-      dropped= st.dropped;
-      animate = st.animate;
-      rows_left = st.rows_left;
-      current_orientation = 
-        let rec next_orientation list = 
-        match list with 
-        | [] -> failwith "no orientation"
-        |     h::[] -> if Some h = st.current_orientation 
-          then Some (List.hd (list)) else failwith "no orientation"
-        |   h::t -> if Some h = st.current_orientation 
-          then Some (List.hd (t)) else next_orientation t in
-    next_orientation (shape_orientations (st.moving_block));
-} in new_shape 
-else 
-  let new_shape = {
+    {
     blockref = add_blockref st 0 0;
     moving_block = st.moving_block;
     time = st.time;
@@ -270,11 +261,33 @@ else
       let rec next_orientation list = 
       match list with 
       | [] -> failwith "no orientation"
-      |  h::[] -> if Some h = st.current_orientation 
-        then Some (List.nth list 3) else failwith "no orientation"
-      |     h::t -> if Some h = st.current_orientation 
-        then Some (List.hd (List.rev t)) else next_orientation t in
-  next_orientation (shape_orientations (st.moving_block));} in new_shape
+      |     h::[] -> if Some h = st.current_orientation 
+        then Some (List.hd (list)) else failwith "no orientation"
+      |   h::t -> if Some h = st.current_orientation 
+        then Some (List.hd (t)) else next_orientation t in
+      next_orientation (shape_orientations (st.moving_block));
+    }
+  else 
+    {
+      blockref = add_blockref st 0 0;
+      moving_block = st.moving_block;
+      time = st.time;
+      queue = st.queue;
+      won = st.won;
+      dropped= st.dropped;
+      animate = st.animate;
+      rows_left = st.rows_left;
+      current_orientation = 
+        let rec next_orientation list = 
+        match list with 
+        | [] -> failwith "no orientation"
+        |  h::[] -> if Some h = st.current_orientation 
+          then Some (List.nth list 3) else failwith "no orientation"
+        |     h::t -> if Some h = st.current_orientation 
+          then Some (List.hd (List.rev t)) else next_orientation t in
+        next_orientation (shape_orientations (st.moving_block));
+    }
+    in erase_moving st; new_shape
 
 let move direction st =
   if direction = "right" then 
@@ -302,9 +315,12 @@ let move direction st =
 
 let drop st = 
   let coords = orientation_coordinates st.current_orientation in
-  let (x, y) = (scan_width st coords (0, 0)) in
+  let (y, x) = (scan_width st coords (0, (((blockref_x st)-50)/tilesize))) in
   let color = shape_color st.moving_block in
   add_dropped_block st.dropped x y coords color;
+  erase_moving st;
+  render_array st.dropped 0 0;
+  print_endline "safe";
   {
     blockref = orig_blockref;
     moving_block = None;

@@ -14,7 +14,7 @@ let keyboard st =
     | 'w' -> rotate "clockwise" st 
     | 'x' -> rotate "counterclockwise" st 
     | 's' | ' ' -> drop st
-    | _ -> st
+    | _ -> raise NoKeyPress
   else raise NoKeyPress
 
 
