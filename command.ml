@@ -9,11 +9,11 @@ let keyboard st =
     match read_key () with 
     | 'd' -> move "right" st
     | 'a' -> move "left" st
-    | 'w' -> rotate "clockwise" 90
-    | 'x' -> rotate "counterclockwise" 90
-    | 's' | ' ' -> drop 
-    | _ -> failwith "not valid"
-
+    | 'w' -> rotate "clockwise" st 
+    | 'x' -> rotate "counterclockwise" st 
+    | 's' | ' ' -> drop st
+    | _ -> st
+  else failwith ""
 
 
 
