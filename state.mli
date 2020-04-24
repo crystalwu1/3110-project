@@ -23,3 +23,4 @@ val drop : t -> t
 (** [row_remove st] is the updated state of [st] with the full rows
     removed *)
 val row_remove : t -> t
+

@@ -70,18 +70,20 @@ let render_moving st =
   set_color color; helper (orientation_coordinates st.current_orientation)
 
 (** [render_array] draws the dropped blocks in [st].*)
-(* let rec render_array dropped x y  = 
-   if dropped.(0).(0) <> 0 then (fill_rect 0 0 tilesize tilesize);
-   render_array dropped 0 (y+1); 
-   else  *)
-
-(* if y = 19 then 
-   if x = 9 then make_val dropped y x 0
-   else (make_val dropped y x 0; rem_row dropped y (x+1))
-   else 
-   if x = 9 then (make_val dropped y x dropped.(x).(y+1); 
-               rem_row dropped (y+1) 0)
-   else make_val dropped y x dropped.(x).(y+1); rem_row dropped y (x+1) *)
+let rec render_array dropped x y  = 
+  let color = dropped.(x).(y) in
+  set_color color;
+  if dropped.(x).(y) = 0 
+  then if (x=9 && y=19) 
+    then fill_rect x y tilesize tilesize 
+    else if y=19 
+    then render_array dropped (x+1) 0
+    else render_array dropped x (y+1)
+  else if (x=9 && y=19) 
+  then fill_rect x y tilesize tilesize
+  else if y=19 then (fill_rect x y tilesize tilesize; 
+                     render_array dropped (x+1) 0)
+  else fill_rect x y tilesize tilesize; render_array dropped x (y+1)
 
 
 (** [erase_moving] redraws the background grid in the shape of the currently moving block in [st].*)
@@ -192,13 +194,13 @@ let row_remove st =
   {
     blockref = st.blockref; 
     moving_block = st.moving_block;
-    current_orientation = orientation_init new_shape;
+    current_orientation = st.current_orientation;
     time = st.time;
     queue = st.queue;
     won = st.won;
     dropped = st.dropped;
     animate = st.animate;
-    rows_left = st.rows_left + new_rows_removed;
+    rows_left = st.rows_left - new_rows_removed;
   }
 
 let update adv st= 
