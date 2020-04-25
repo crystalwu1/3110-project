@@ -288,7 +288,7 @@ let rec leftmost_coord acc lst =
 let rec rightmost_coord acc lst = 
   match lst with
   | [] -> acc
-  | (x,y)::t -> if x < acc 
+  | (x,y)::t -> if x > acc 
     then rightmost_coord x t else rightmost_coord acc t
 
 let move direction st =
@@ -296,7 +296,8 @@ let move direction st =
   if ((leftmost_coord (blockref_x st) (pixel_list)) <= 50 
       && direction = "left") then st
   else 
-  if (rightmost_coord (blockref_x st) (pixel_list)) >= 350 then st 
+  if (rightmost_coord (blockref_x st) (pixel_list)) >= 350 - tilesize  
+  && direction = "right" then st 
   else 
   if direction = "right" then 
     let new_shape = {
