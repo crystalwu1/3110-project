@@ -121,18 +121,29 @@ let erase_moving st =
       helper t
   in set_color darkgrey; helper (orientation_coordinates st.current_orientation)
 
+(** [render_time st] draws the rows remaining from [st] into the board.*)
+let render_lines_remaining st =
+  set_color white;
+  set_text_size 30;
+  moveto 490 600;
+  draw_string (string_of_int st.rows_left)
+
+(** [erase_lines_remaining st] redraws the window over the rows remaining. *)
+let erase_lines_remaining st = 
+  set_color black;
+  fill_rect 490 600 30 100 
+
 (** [render_time st] draws the time integer into the board.*)
 let render_time st =
   set_color white;
   set_text_size 30;
-
-  moveto 400 600;
+  moveto 450 600;
   draw_string (string_of_int st.time)
 
 (** [erase_time st] redraws the window over the time. *)
 let erase_time st = 
   set_color black;
-  fill_rect 400 600 30 100  
+  fill_rect 450 600 30 100  
 
 let pop queue adv = 
   match queue with 
@@ -288,15 +299,17 @@ let rec leftmost_coord acc lst =
 let rec rightmost_coord acc lst = 
   match lst with
   | [] -> acc
-  | (x,y)::t -> if x < acc 
+  | (x,y)::t -> if x > acc 
     then rightmost_coord x t else rightmost_coord acc t
 
 let move direction st =
   let  pixel_list = convert_blk_to_pix_coor st (orientation_coordinates st.current_orientation) [] in 
+
   if ((leftmost_coord (blockref_x st) (pixel_list)) <= 50 
       && direction = "left") then st
   else 
-  if (rightmost_coord (blockref_x st) (pixel_list)) >= 350 then st 
+  if (rightmost_coord (blockref_x st) (pixel_list)) >= 350 
+  && direction = "right" then st 
   else 
   if direction = "right" then 
     let new_shape = {
