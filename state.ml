@@ -277,7 +277,7 @@ let update game st =
   (* print_endline (string_of_bool (st.animate=100)); *)
   (* if st.animate mod 7500 = 0 then erase_time st; *)
   render_time result;
-  render_block st.moving_block (blockref_x st) (blockref_y st) st.current_orientation; 
+  render_block result.moving_block (blockref_x st) (blockref_y st) st.current_orientation; 
   result
 
 let rec leftmost_coord acc lst = 
