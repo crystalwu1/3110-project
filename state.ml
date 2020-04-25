@@ -308,11 +308,7 @@ let move direction st =
   if ((leftmost_coord (blockref_x st) (pixel_list)) <= 50 
       && direction = "left") then st
   else 
-<<<<<<< HEAD
-  if (rightmost_coord (blockref_x st) (pixel_list)) >= 350 
-=======
   if (rightmost_coord (blockref_x st) (pixel_list)) >= 350 - tilesize  
->>>>>>> 82ae776e1dab0fadf3eaf3d38dd15dd74402adfe
   && direction = "right" then st 
   else 
   if direction = "right" then 
