@@ -5,6 +5,6 @@ open State
 
 exception NoKeyPress
 
-val keyboard : State.t -> (State.t)
+val keyboard : Game.t -> State.t -> (State.t)
 
 

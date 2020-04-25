@@ -93,3 +93,41 @@ let orientation_init shpe =
   | [] -> None
   | h::t -> Some h
 
+(** [get_shape_helper shapes shape] is the [shape] named [shape_name] in 
+    the [shapes]  *)
+let rec get_shape_helper shapes shape_name = 
+  match shapes with
+  | [] -> failwith "shape not found"
+  | h::t -> if h.shape_name = shape_name then h 
+    else get_shape_helper t shape_name
+
+let get_shape game shape = 
+  get_shape_helper game.shapes shape
+
+let get_first lst = 
+  match lst with 
+  | [] -> failwith "empty list"
+  | h::t -> h
+
+let rec next_orientation_helper o_list curr_orientation = 
+  match o_list with
+  | [] -> failwith "current orientation not found"
+  | h::x::t -> if h.shape_name = curr_orientation then x 
+    else next_orientation_helper (x::t) curr_orientation
+  | h::t -> failwith "current orientation not found"
+
+let next_shape direction orientation_list curr_orientation =
+  let o_list = 
+    if direction then ([orientation_list]@[orientation_list])
+    else ([List.rev orientation_list]@[List.rev orientation_list]) in
+  next_shape_helper o_list curr_orientation
+
+
+let rec next_orientation direction game shape_name curr_orientation = 
+  match shape.orientations with 
+  | [] -> failwith "no orientation"
+  | h::[] -> if Some h = curr_orientation 
+    then Some (List.nth list 3) else failwith "no orientation"
+  | h::t -> if Some h = curr_orientation 
+    then Some (List.hd (List.rev t)) else next_orientation direction game t curr_orientation
+

@@ -9,14 +9,14 @@ let rec read_helper () =
   | exception End_of_file -> ()
   | _ -> ()
 
-let rec run_game adv st  = 
+let rec run_game game st  = 
   (* print_endline "running"; *)
   if won st then ()  
-  else try let x = keyboard st in x |> update adv |> run_game adv with 
-  | NoKeyPress -> run_game adv (update adv st)
+  else try let x = keyboard game st in x |> update game |> run_game game with 
+    | NoKeyPress -> run_game game (update game st)
 
-let start_game f = let adventure = f |>  Yojson.Basic.from_file |> parse in 
-  run_game adventure (init_state adventure) 
+let start_game f = let game = f |>  Yojson.Basic.from_file |> parse in 
+  run_game game (init_state game) 
 
 let main () = 
   (* ANSITerminal.(print_string [red]

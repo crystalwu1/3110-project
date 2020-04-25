@@ -81,17 +81,17 @@ let rec render_array dropped x y =
       if (x=9 && y=19) 
       then ()
       else 
-        if y=19 
-        then render_array dropped (x+1) 0
-        else (render_array dropped x (y+1))
+      if y=19 
+      then render_array dropped (x+1) 0
+      else (render_array dropped x (y+1))
     else 
-      if (x=9 && y=19) 
-      then fill_rect (x*tilesize+50) (y*tilesize+100) tilesize tilesize
-      else 
-        if y=19 
-        then (set_color dropped.(x).(y); fill_rect (x*tilesize+50) (y*tilesize+100) tilesize tilesize; render_array dropped (x+1) 0)
-        else (set_color dropped.(x).(y); fill_rect (x*tilesize+50) (y*tilesize+100) tilesize tilesize; render_array dropped x (y+1)
-  ))
+    if (x=9 && y=19) 
+    then fill_rect (x*tilesize+50) (y*tilesize+100) tilesize tilesize
+    else 
+    if y=19 
+    then (set_color dropped.(x).(y); fill_rect (x*tilesize+50) (y*tilesize+100) tilesize tilesize; render_array dropped (x+1) 0)
+    else (set_color dropped.(x).(y); fill_rect (x*tilesize+50) (y*tilesize+100) tilesize tilesize; render_array dropped x (y+1)
+         ))
 
 (** [erase_moving] redraws the background grid in the shape of the currently moving block in [st].*)
 let erase_moving st = 
@@ -132,9 +132,9 @@ let pop queue adv =
     in [column] at [idx] and lower with a value greater than 0 *)
 let rec find_lowest_y_helper column idx = 
   if idx < 0 then 0 else 
-  match column.(idx) with
-  | n when n > 0 -> idx
-  | _ -> find_lowest_y_helper column (idx-1)
+    match column.(idx) with
+    | n when n > 0 -> idx
+    | _ -> find_lowest_y_helper column (idx-1)
 
 let find_lowest_y dropped column =
   find_lowest_y_helper dropped.(column) 19
@@ -143,7 +143,7 @@ let rec scan_width st orient acc=
   match orient with
   | [] -> acc
   | h::t -> let col = ((blockref_x st)-50)/tilesize+(coord_x h) in
-  (* print_endline (string_of_int col); *)
+    (* print_endline (string_of_int col); *)
     let calc = find_lowest_y st.dropped col in
     match acc with
     | (x, _) -> scan_width st t (if calc > x then (calc, col) else acc)
@@ -211,7 +211,7 @@ let row_remove st =
     rows_left = st.rows_left - new_rows_removed;
   }
 
-let update adv st= 
+let update adv st = 
   let result = 
     if st.moving_block = None then 
       let (new_shape, new_queue) = pop st.queue adv in 
@@ -245,51 +245,49 @@ let update adv st=
   render_moving result; 
   result
 
-let rotate string st = 
+let rotate string st t = 
   let new_shape = 
-  if string = "clockwise" then 
-    {
-    blockref = add_blockref st 0 0;
-    moving_block = st.moving_block;
-    time = st.time;
-    queue = st.queue;
-    won = st.won;
-    dropped= st.dropped;
-    animate = st.animate;
-    rows_left = st.rows_left;
-    current_orientation = 
-      let rec next_orientation list = 
-      match list with 
-      | [] -> failwith "no orientation"
-      |     h::[] -> if Some h = st.current_orientation 
-        then Some (List.hd (list)) else failwith "no orientation"
-      |   h::t -> if Some h = st.current_orientation 
-        then Some (List.hd (t)) else next_orientation t in
-      next_orientation (shape_orientations (st.moving_block));
-    }
-  else 
-    {
-      blockref = add_blockref st 0 0;
-      moving_block = st.moving_block;
-      time = st.time;
-      queue = st.queue;
-      won = st.won;
-      dropped= st.dropped;
-      animate = st.animate;
-      rows_left = st.rows_left;
-      current_orientation = 
-        let rec next_orientation list = 
-        match list with 
-        | [] -> failwith "no orientation"
-        |  h::[] -> if Some h = st.current_orientation 
-          then Some (List.nth list 3) else failwith "no orientation"
-        |     h::t -> if Some h = st.current_orientation 
-          then Some (List.hd (List.rev t)) else next_orientation t in
-        next_orientation (shape_orientations (st.moving_block));
-    }
-    in erase_moving st; new_shape
+    if string = "clockwise" then 
+      {
+        blockref = add_blockref st 0 0;
+        moving_block = st.moving_block;
+        time = st.time;
+        queue = st.queue;
+        won = st.won;
+        dropped= st.dropped;
+        animate = st.animate;
+        rows_left = st.rows_left;
+        current_orientation = 
+          let rec next_orientation list = 
+            match list with 
+            | [] -> failwith "no orientation"
+            |     h::[] -> if Some h = st.current_orientation 
+              then Some (List.hd (list)) else failwith "no orientation"
+            |   h::t -> if Some h = st.current_orientation 
+              then Some (List.hd (t)) else next_orientation t in
+          next_orientation (shape_orientations (st.moving_block));
+      }
+    else 
+      {
+        blockref = add_blockref st 0 0;
+        moving_block = st.moving_block;
+        time = st.time;
+        queue = st.queue;
+        won = st.won;
+        dropped= st.dropped;
+        animate = st.animate;
+        rows_left = st.rows_left;
+        current_orientation = 
+          next_orientation false t (shape_orientations (st.moving_block)) st.current_orientation;
+      }
+  in erase_moving st; new_shape
 
 let move direction st =
+  if (blockref_x st = 50 && direction = "left") 
+  then st 
+  else 
+  if (blockref_x st + tilesize = 350 && direction = "right") then st 
+  else 
   if direction = "right" then 
     let new_shape = {
       blockref = add_blockref st tilesize 0;

@@ -37,3 +37,5 @@ val coord_y : coordinate -> int
 val rand_shape : t -> shape
 
 val orientation_init : shape -> orientation option
+
+val next_orientation : bool -> t -> orientation list -> orientation option -> orientation option
