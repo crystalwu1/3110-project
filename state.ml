@@ -56,7 +56,6 @@ let rec convert_blk_to_pix_coor st lst acc =
                 (blockref_y st)+((coord_y h)*tilesize))::acc)
 
 (* (blockref+(coord value *tilesize ) *)
-
 (** [add-blockref st num1 num2] is an [(int * int)] containing the current blockref of [st], but with
     [num1] added to the first value, and [num2] added to the second.*)
 let add_blockref st num1 num2 =
@@ -65,7 +64,6 @@ let add_blockref st num1 num2 =
 
 
 let won st = st.won
-
 (** [render_block] draws the current moving_block in [st].*)
 let render_block mov_block refx refy orientation =  
   let color = shape_color mov_block in
@@ -75,7 +73,10 @@ let render_block mov_block refx refy orientation =
     | h::t -> 
       let x = coord_x h in
       let y = coord_y h in
-      fill_rect (refx+x*tilesize) (refy+y*tilesize) tilesize tilesize;
+      if (refy+y*tilesize) < 700 then
+      (fill_rect (refx+x*tilesize) (refy+y*tilesize) tilesize tilesize;
+      helper t)
+      else 
       helper t
   in 
   set_color color; helper (orientation_coordinates orientation)
@@ -112,11 +113,13 @@ let erase_moving st =
     | h::t -> 
       let x = coord_x h in
       let y = coord_y h in
-      set_color black;
+      if (refy+y*tilesize) < 700 then
+      (set_color black;
       fill_rect (refx+x*tilesize) (refy+y*tilesize) tilesize tilesize;
       set_color darkgrey;
       draw_rect (refx+x*tilesize) (refy+y*tilesize) tilesize tilesize;
-      helper t
+      helper t)
+      else helper t
   in set_color darkgrey; helper (orientation_coordinates st.current_orientation)
 
 (** [render_time st] draws the rows remaining from [st] into the board.*)
@@ -165,88 +168,18 @@ let pop queue game =
 (** [find_lowest_y_helper] finds the index of the top most element 
     in [column] at [idx] and lower with a value greater than 0 *)
 let rec find_lowest_y_helper column idx = 
-<<<<<<< HEAD
-  if idx < 0 then 0 else 
-    match column.(idx) with
-    | n when n > 0 -> (idx)
-    | _ -> find_lowest_y_helper column (idx-1)
-=======
   if idx < 0 then -1 else 
   match column.(idx) with
   | n when n > 0 -> (idx)
   | _ -> find_lowest_y_helper column (idx-1)
->>>>>>> working on dropping
 
 (** finds the highest cell that is filled*)
 let find_lowest_y dropped column =
   find_lowest_y_helper dropped.(column) 19
 
-(* let break_tuple tuple = 
-  let (x, y) = tuple in x *)
-
-(** returns the highest tile in the array that is filled*)
-(* let rec scan_width st orient acc=
-  match orient with
-  | [] -> acc  
-<<<<<<< HEAD
-  | h::t -> let col = ((blockref_x st)-50)/tilesize+(coord_x h) in
-    (* print_endline (string_of_int col); *)
-    let calc = find_lowest_y st.dropped col in
-    print_endline (string_of_int calc);
-    match acc with
-    | x -> scan_width st t (if calc > x then calc else acc)
-=======
-  | h::t -> 
-      let col_h = (((blockref_x st)-50)-((blockref_x st) mod tilesize)) / tilesize + (coord_x h) in
-      let highest_filled = find_lowest_y st.dropped col_h in
-      scan_width st t (if highest_filled >= (break_tuple acc) then ((coord_x h), highest_filled) else acc) *)
-
-      (* returns the coordinate that has the lowest y value *)
-  let bottom_coord lst acc= 
-    match lst with 
-    | [] -> acc 
-    | h::t -> if (coord_y h) < coord_y acc then h else acc
->>>>>>> working on dropping
-
-
 (** [add_coordinate dropped x y color] set coordinate ([x],[y]) to [color] *)
 let add_coordinate dropped x y color = 
   dropped.(x).(y) <- color
-
-let col_moving st x = 
-  let pixels = (blockref_x st) in
-  let calc = pixels - (pixels mod tilesize) in x + (calc/tilesize)
-
-(** [add_dropped_block dropped x y coor_list color] will add the value [color] 
-    to dropped at the coordinates from [coor_list] relative to [x] and [y]  *)
-<<<<<<< HEAD
-let rec add_dropped_block dropped x y low coor_list color =
-  match coor_list with 
-=======
-let rec add_dropped_block dropped coord_lst curr_col lowest coord_high high_y color =
-  match coord_lst with
->>>>>>> working on dropping
-  | [] -> ()
-  | h::t -> 
-    let x_coor = coord_x h in 
-    let y_coor = coord_y h in 
-<<<<<<< HEAD
-    add_coordinate dropped (x+x_coor) ((-low)+y+y_coor) color;
-    add_dropped_block dropped x y low t color
-
-let bottom_coord lst acc= 
-  match lst with 
-  | [] -> acc 
-  | h::t -> if (coord_y h) < acc then coord_y h else acc
-=======
-    print_endline (string_of_int ((lowest)));
-    print_endline (string_of_int (high_y));
-    print_endline (string_of_int coord_high);
-    print_endline (string_of_int y_coor);
-    print_endline "---------------------------";
-    add_coordinate dropped (curr_col+x_coor) (y_coor+high_y+coord_high-lowest) color;
-    add_dropped_block dropped t curr_col lowest coord_high high_y color
->>>>>>> working on dropping
 
 (** [can_remove dropped y x] is true if there is no 0 valued 
     element in row [y] starting at position [x] and false otherwise *)
@@ -325,10 +258,8 @@ let update game st =
         rows_left = st.rows_left;
       }) in 
   if st.animate mod 100 = 0 then erase_moving st;
-  (* print_endline (string_of_bool (st.animate=100)); *)
-  (* if st.animate mod 7500 = 0 then erase_time st; *)
   render_time result;
-  render_block result.moving_block (blockref_x st) (blockref_y st) st.current_orientation; 
+  render_block result.moving_block (blockref_x result) (blockref_y result) st.current_orientation; 
   result
 
 let rec leftmost_coord acc lst = 
@@ -356,7 +287,6 @@ let rotate string st game =
     current_orientation = 
       next_orientation string game st.moving_block st.current_orientation
   } in 
-
   let pixel_list = convert_blk_to_pix_coor st (orientation_coordinates new_shape.current_orientation) [] in 
   if (leftmost_coord (blockref_x st) pixel_list) <= 50 then  
     let shifted_right_shape = {
@@ -431,28 +361,59 @@ let move direction st =
       animate = st.animate;
       rows_left = st.rows_left } in erase_moving st; new_shape 
 
-(* let drop st = 
+(* returns (y-value of the highest cell within the block's width, y-coordinate of that block) *)
+let rec parse_dropped dropped coords curr_col acc= 
+  match coords with 
+  | [] -> acc
+  | h::t -> 
+    let x = coord_x h in 
+    let y = coord_y h in 
+    let temp_col = curr_col + x in
+    let temp = find_lowest_y dropped temp_col in 
+    print_endline (string_of_int temp);
+    let updated = 
+      if temp = (fst acc) 
+      then
+        if y > (snd acc)
+        then acc 
+        else (temp, y)
+      else 
+        if temp > (fst acc)
+        then (temp, y) 
+        else acc in 
+    parse_dropped dropped t curr_col updated
+
+let rec add_to_dropped dropped color coords target_cell y_target_coord curr_col lowest_coord= 
+  match coords with 
+  | [] -> ()
+  | h::t -> 
+    let x = coord_x h in 
+    let y = coord_y h in 
+    (* print_endline "---------------------------";
+    print_endline (string_of_int target_cell);
+    print_endline (string_of_int (-y_target_coord));
+    print_endline (string_of_int y);
+    print_endline (string_of_int (-lowest_coord));
+    print_endline (string_of_int (target_cell-y_target_coord+y-lowest_coord)); *)
+    add_coordinate dropped (curr_col+x) (target_cell-y_target_coord+y-lowest_coord) color;
+    add_to_dropped dropped color t target_cell y_target_coord curr_col lowest_coord
+
+let curr_col st = 
+  let pixels = (blockref_x st)-50 in
+  let calc = pixels - (pixels mod tilesize) in (calc/tilesize)
+
+let rec lowest_coord coords acc= 
+  match coords with 
+    | [] -> acc 
+    | h::t -> if (coord_y h) < acc then lowest_coord t (coord_y h) else lowest_coord t acc
+
+let drop st = 
+  let color = shape_color st.moving_block in
   let coords = orientation_coordinates st.current_orientation in
-<<<<<<< HEAD
-  let x = (((blockref_x st)-50)/tilesize) in
-  let y = (scan_width st coords 0) in
-  let color = shape_color st.moving_block in
-  (* print_endline (string_of_int y); *)
-  (* print_endline (string_of_int (bottom_coord coords 0)); *)
-  add_dropped_block st.dropped x (y) (bottom_coord coords 0) coords color;
-=======
-  let color = shape_color st.moving_block in
-  (* the column that the block is currently in *)
-  let x = (((blockref_x st)-50)/tilesize) in
-  (* the coordinate with the lowest y value  *)
-  let z = bottom_coord coords (List.hd coords) in 
-  (* let moving_col = col_moving st (coord_x z) in *)
-  (* let target = find_lowest_y st.dropped moving_col in *)
-  let (coord_high, high_y) = (scan_width st coords (0, 0)) in
-  (* print_endline (string_of_int moving_col); *)
-  (* print_endline (string_of_int (bottom_coord coords 0)); *)
-  add_dropped_block st.dropped coords x (coord_y z) coord_high high_y color;
->>>>>>> working on dropping
+  let curr_col = curr_col st in 
+  let (target_cell, y_target_coord) = parse_dropped st.dropped coords curr_col (0,0) in
+  let lowest_coord = lowest_coord coords 0 in
+  add_to_dropped st.dropped color coords target_cell y_target_coord curr_col lowest_coord;
   erase_moving st;
   render_array st.dropped 0 0;
   {
@@ -465,72 +426,7 @@ let move direction st =
     dropped= st.dropped;
     animate = st.animate;
     rows_left = st.rows_left;
-  } *)
-
-  (* returns (y-value of the highest cell within the block's width, y-coordinate of that block) *)
-  let rec parse_dropped dropped coords curr_col acc= 
-    match coords with 
-    | [] -> acc
-    | h::t -> 
-      let x = coord_x h in 
-      let y = coord_y h in 
-      let temp_col = curr_col + x in
-      let temp = find_lowest_y dropped temp_col in 
-      let updated = 
-        if temp = (fst acc) 
-        then
-          if y > (snd acc)
-          then acc 
-          else (temp, y)
-        else 
-          if temp > (fst acc)
-          then (temp, y) 
-          else acc in 
-      parse_dropped dropped t curr_col updated
-
-  let rec add_to_dropped dropped color coords target_cell y_target_coord curr_col lowest_coord= 
-    match coords with 
-    | [] -> ()
-    | h::t -> 
-      let x = coord_x h in 
-      let y = coord_y h in 
-      print_endline "---------------------------";
-      print_endline (string_of_int target_cell);
-      print_endline (string_of_int y_target_coord);
-      print_endline (string_of_int y);
-      print_endline (string_of_int lowest_coord);
-      add_coordinate dropped (curr_col+x) (target_cell-y_target_coord+y-lowest_coord) color;
-      add_to_dropped dropped color t target_cell y_target_coord curr_col lowest_coord
-
-  let curr_col st = 
-    let pixels = (blockref_x st)-50 in
-    let calc = pixels - (pixels mod tilesize) in (calc/tilesize)
-
-  let rec lowest_coord coords acc= 
-    match coords with 
-      | [] -> acc 
-      | h::t -> if (coord_y h) < acc then lowest_coord t (coord_y h) else lowest_coord t acc
-
-  let drop st = 
-    let color = shape_color st.moving_block in
-    let coords = orientation_coordinates st.current_orientation in
-    let curr_col = curr_col st in 
-    let (target_cell, y_target_coord) = parse_dropped st.dropped coords curr_col (0,0) in
-    let lowest_coord = lowest_coord coords 0 in
-    add_to_dropped st.dropped color coords target_cell y_target_coord curr_col lowest_coord;
-    erase_moving st;
-    render_array st.dropped 0 0;
-    {
-      blockref = orig_blockref;
-      moving_block = None;
-      current_orientation = None;
-      time = st.time;
-      queue = st.queue;
-      won = st.won;
-      dropped= st.dropped;
-      animate = st.animate;
-      rows_left = st.rows_left;
-    }
+  }
 
   
   
