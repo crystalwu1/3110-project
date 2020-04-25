@@ -68,8 +68,8 @@ let add_blockref st num1 num2 =
 let won st = st.won
 
 (** [render_block] draws the current moving_block in [st].*)
-let render_block st refx refy orientation =  
-  let color = shape_color st.moving_block in
+let render_block mov_block refx refy orientation =  
+  let color = shape_color mov_block in
   let rec helper coords =
     match coords with
     | [] -> ()
@@ -144,15 +144,23 @@ let erase_time st =
   set_color black;
   fill_rect 450 680 30 100  
 
+let find_height shape = 
+  3
+
+let erase_q () = 
+  set_color black;
+  fill_rect 360 0 200 650
+
 let rec render_q q dx dy =
   match q with
   | [] -> ()
-  | h::t -> render_block h.orientation dx dy; render_q t dx (dy-(5*tilesize))
+  | h::t -> render_block (Some h) dx dy (orientation_init h); 
+    render_q t dx (dy-(tilesize*(1+(shape_height h))))
 
 let pop queue game = 
   match queue with 
-  | x::t -> let q = ((rand_shape game) :: t) in 
-    render_q q 50 50; (x, q)
+  | x::t -> let q = (t@(rand_shape game::[])) in 
+    erase_q () ; render_q q 440 570; (x, q)
   | [] -> raise NoMoreBlocks
 
 (** [find_lowest_y_helper] finds the index of the top most element 

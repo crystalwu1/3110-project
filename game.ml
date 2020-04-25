@@ -93,6 +93,22 @@ let orientation_init shpe =
   | [] -> None
   | h::t -> Some h
 
+let min x y =
+  if x >= y then y else x
+
+let max x y =
+  if x >= y then x else y
+
+let rec shape_height_helper lst min_y max_y =
+  match lst with
+  | [] -> max_y - min_y + 1
+  | h::t -> let y = coord_y h in shape_height_helper t (min y min_y) (max y max_y)
+
+let shape_height shpe = 
+  match (orientation_init shpe) with
+  | None -> failwith "no orientations"
+  | Some o -> shape_height_helper o.coordinates 1 (-1)
+
 (** [get_shape_helper shapes shape] is the [shape] named [shape_name] in 
     the [shapes]  *)
 let rec get_shape_helper shapes shape_name = 
