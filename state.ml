@@ -46,6 +46,17 @@ let blockref_y st =
   match st.blockref with
   | (_, y) -> y
 
+(** [convert_blk_to_pix_coor st lst acc] is a list of pixel coordinates 
+    calculated from the [blockref] value in [st] and the block coordinates
+    from [lst] combined with the pixel coordinates in [acc] *)
+let rec convert_blk_to_pix_coor st lst acc = 
+  match lst with
+  | [] -> acc
+  | h::t -> convert_blk_to_pix_coor st t 
+              (((blockref_x st)+((coord_x h)*tilesize),
+                (blockref_y st)+((coord_y h)*tilesize))::acc)
+
+(* (blockref+(coord value *tilesize ) *)
 
 (** [add-blockref st num1 num2] is an [(int * int)] containing the current blockref of [st], but with
     [num1] added to the first value, and [num2] added to the second.*)
@@ -133,20 +144,23 @@ let pop queue adv =
 let rec find_lowest_y_helper column idx = 
   if idx < 0 then 0 else 
     match column.(idx) with
-    | n when n > 0 -> idx
+    | n when n > 0 -> (idx)
     | _ -> find_lowest_y_helper column (idx-1)
 
+(** finds the highest cell that is filled*)
 let find_lowest_y dropped column =
   find_lowest_y_helper dropped.(column) 19
 
 let rec scan_width st orient acc=
   match orient with
-  | [] -> acc
+  | [] -> acc  
   | h::t -> let col = ((blockref_x st)-50)/tilesize+(coord_x h) in
     (* print_endline (string_of_int col); *)
     let calc = find_lowest_y st.dropped col in
+    print_endline (string_of_int calc);
     match acc with
-    | (x, _) -> scan_width st t (if calc > x then (calc, col) else acc)
+    | x -> scan_width st t (if calc > x then calc else acc)
+
 
 (** [add_coordinate dropped x y color] set coordinate ([x],[y]) to [color] *)
 let add_coordinate dropped x y color = 
@@ -154,13 +168,18 @@ let add_coordinate dropped x y color =
 
 (** [add_dropped_block dropped x y coor_list color] will add the value [color] 
     to dropped at the coordinates from [coor_list] relative to [x] and [y]  *)
-let rec add_dropped_block dropped x y coor_list color =
+let rec add_dropped_block dropped x y low coor_list color =
   match coor_list with 
   | [] -> ()
   | h::t -> let x_coor = coord_x h in 
     let y_coor = coord_y h in 
-    add_coordinate dropped (x+x_coor) (y+y_coor) color;
-    add_dropped_block dropped x y t color
+    add_coordinate dropped (x+x_coor) ((-low)+y+y_coor) color;
+    add_dropped_block dropped x y low t color
+
+let bottom_coord lst acc= 
+  match lst with 
+  | [] -> acc 
+  | h::t -> if (coord_y h) < acc then coord_y h else acc
 
 (** [can_remove dropped y x] is true if there is no 0 valued 
     element in row [y] starting at position [x] and false otherwise *)
@@ -211,10 +230,10 @@ let row_remove st =
     rows_left = st.rows_left - new_rows_removed;
   }
 
-let update adv st = 
+let update game st = 
   let result = 
     if st.moving_block = None then 
-      let (new_shape, new_queue) = pop st.queue adv in 
+      let (new_shape, new_queue) = pop st.queue game in 
       {
         blockref = st.blockref;
         moving_block = Some new_shape;
@@ -245,48 +264,39 @@ let update adv st =
   render_moving result; 
   result
 
-let rotate string st t = 
-  let new_shape = 
-    if string = "clockwise" then 
-      {
-        blockref = add_blockref st 0 0;
-        moving_block = st.moving_block;
-        time = st.time;
-        queue = st.queue;
-        won = st.won;
-        dropped= st.dropped;
-        animate = st.animate;
-        rows_left = st.rows_left;
-        current_orientation = 
-          let rec next_orientation list = 
-            match list with 
-            | [] -> failwith "no orientation"
-            |     h::[] -> if Some h = st.current_orientation 
-              then Some (List.hd (list)) else failwith "no orientation"
-            |   h::t -> if Some h = st.current_orientation 
-              then Some (List.hd (t)) else next_orientation t in
-          next_orientation (shape_orientations (st.moving_block));
-      }
-    else 
-      {
-        blockref = add_blockref st 0 0;
-        moving_block = st.moving_block;
-        time = st.time;
-        queue = st.queue;
-        won = st.won;
-        dropped= st.dropped;
-        animate = st.animate;
-        rows_left = st.rows_left;
-        current_orientation = 
-          next_orientation false t (shape_orientations (st.moving_block)) st.current_orientation;
-      }
+let rotate string st game = 
+  let new_shape = {
+    blockref = add_blockref st 0 0;
+    moving_block = st.moving_block;
+    time = st.time;
+    queue = st.queue;
+    won = st.won;
+    dropped = st.dropped;
+    animate = st.animate;
+    rows_left = st.rows_left;
+    current_orientation = 
+      next_orientation string game st.moving_block st.current_orientation
+  }
   in erase_moving st; new_shape
 
+let rec leftmost_coord acc lst = 
+  match lst with
+  | [] -> acc
+  | (x,y)::t -> if x < acc 
+    then leftmost_coord x t else leftmost_coord acc t
+
+let rec rightmost_coord acc lst = 
+  match lst with
+  | [] -> acc
+  | (x,y)::t -> if x < acc 
+    then rightmost_coord x t else rightmost_coord acc t
+
 let move direction st =
-  if (blockref_x st = 50 && direction = "left") 
-  then st 
+  let  pixel_list = convert_blk_to_pix_coor st (orientation_coordinates st.current_orientation) [] in 
+  if ((leftmost_coord (blockref_x st) (pixel_list)) <= 50 
+      && direction = "left") then st
   else 
-  if (blockref_x st + tilesize = 350 && direction = "right") then st 
+  if (rightmost_coord (blockref_x st) (pixel_list)) >= 350 then st 
   else 
   if direction = "right" then 
     let new_shape = {
@@ -313,9 +323,12 @@ let move direction st =
 
 let drop st = 
   let coords = orientation_coordinates st.current_orientation in
-  let (y, x) = (scan_width st coords (0, (((blockref_x st)-50)/tilesize))) in
+  let x = (((blockref_x st)-50)/tilesize) in
+  let y = (scan_width st coords 0) in
   let color = shape_color st.moving_block in
-  add_dropped_block st.dropped x y coords color;
+  (* print_endline (string_of_int y); *)
+  (* print_endline (string_of_int (bottom_coord coords 0)); *)
+  add_dropped_block st.dropped x (y) (bottom_coord coords 0) coords color;
   erase_moving st;
   render_array st.dropped 0 0;
   print_endline "safe";

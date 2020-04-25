@@ -7,13 +7,20 @@ let boardh = 600
 let darkgrey = rgb 40 40 40
 let tilesize = boardh / 20
 
-(** [clear_window color] fills in the background of the window.*)
+(** [score color] writes "Score:" in [color] .*)
+let score color = 
+  rmoveto 400 650;
+  set_color color;
+  draw_string ("Score:")
+
+(** [clear_window color] fills in the background of the window with [color] .*)
 let clear_window color = 
   set_color color;
   fill_rect 0 0 (size_x ()) (size_y ())
 
-(** [grid_helper acc total constx consty dx dy] draws in [total] pairs of grid lines of length [consty]
-    and width [constx], with spacing width [dx] and height [dy].*)
+(** [grid_helper acc total constx consty dx dy] draws in [total] pairs of 
+    grid lines of length [consty] and width [constx], with spacing width [dx] 
+    and height [dy].*)
 let rec grid_helper acc total constx consty dx dy=
   if acc = total then (moveto startx starty) else
     (rmoveto dx dy;

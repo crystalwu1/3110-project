@@ -11,8 +11,8 @@ let keyboard game st =
     match read_key () with 
     | 'd' -> move "right" st
     | 'a' -> move "left" st
-    | 'w' -> rotate game "clockwise" st 
-    | 'x' -> rotate game "counterclockwise" st 
+    | 'w' -> rotate "clockwise" st game
+    | 'x' -> rotate "counterclockwise" st game
     | 's' | ' ' -> drop st
     | _ -> raise NoKeyPress
   else raise NoKeyPress

@@ -38,4 +38,5 @@ val rand_shape : t -> shape
 
 val orientation_init : shape -> orientation option
 
-val next_orientation : bool -> t -> orientation list -> orientation option -> orientation option
+val next_orientation : string -> t -> shape option -> 
+  orientation option -> orientation option
