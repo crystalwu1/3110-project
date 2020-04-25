@@ -8,13 +8,16 @@ let darkgrey = rgb 40 40 40
 let white = rgb 255 255 255 
 let tilesize = boardh / 20
 
-(** [score_and_time color] writes "Lines Remaining:" and "Time:" in [color] .*)
-let score_and_time color = 
-  moveto 410 620;
+(** [score_time_q color] writes "Lines Remaining:", "Time:", and 
+    "Queue:" in [color] .*)
+let score_time_q color = 
+  moveto 410 700;
   set_color color;
   draw_string ("Lines Remaining:");
-  moveto 410 600;
-  draw_string ("Score:")
+  moveto 410 680;
+  draw_string ("Score:");
+  moveto 410 660;
+  draw_string ("Queue:")
 
 (** [clear_window color] fills in the background of the window with [color] .*)
 let clear_window color = 
@@ -53,4 +56,4 @@ let make_window () =
   set_window_title "tetris";
   clear_window black;
   create_board ();
-  score_and_time white
+  score_time_q white

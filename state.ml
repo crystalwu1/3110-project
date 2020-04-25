@@ -66,10 +66,9 @@ let add_blockref st num1 num2 =
 
 
 let won st = st.won
-(** [render_moving] draws the current moving_block in [st].*)
-let render_moving st = 
-  let refx = blockref_x st in
-  let refy = blockref_y st in 
+
+(** [render_block] draws the current moving_block in [st].*)
+let render_block st refx refy orientation =  
   let color = shape_color st.moving_block in
   let rec helper coords =
     match coords with
@@ -80,7 +79,7 @@ let render_moving st =
       fill_rect (refx+x*tilesize) (refy+y*tilesize) tilesize tilesize;
       helper t
   in 
-  set_color color; helper (orientation_coordinates st.current_orientation)
+  set_color color; helper (orientation_coordinates orientation)
 
 (** [render_array] draws the dropped blocks in [st].*)
 let rec render_array dropped x y = 
@@ -125,29 +124,35 @@ let erase_moving st =
 let render_lines_remaining st =
   set_color white;
   set_text_size 30;
-  moveto 490 600;
+  moveto 490 700;
   draw_string (string_of_int st.rows_left)
 
 (** [erase_lines_remaining st] redraws the window over the rows remaining. *)
 let erase_lines_remaining st = 
   set_color black;
-  fill_rect 490 600 30 100 
+  fill_rect 490 700 30 100 
 
 (** [render_time st] draws the time integer into the board.*)
 let render_time st =
   set_color white;
   set_text_size 30;
-  moveto 450 600;
+  moveto 450 680;
   draw_string (string_of_int st.time)
 
 (** [erase_time st] redraws the window over the time. *)
 let erase_time st = 
   set_color black;
-  fill_rect 450 600 30 100  
+  fill_rect 450 680 30 100  
 
-let pop queue adv = 
+let rec render_q q dx dy =
+  match q with
+  | [] -> ()
+  | h::t -> render_block h.orientation dx dy; render_q t dx (dy-(5*tilesize))
+
+let pop queue game = 
   match queue with 
-  | x::t -> (x, (rand_shape adv :: t))
+  | x::t -> let q = ((rand_shape game) :: t) in 
+    render_q q 50 50; (x, q)
   | [] -> raise NoMoreBlocks
 
 (** [find_lowest_y_helper] finds the index of the top most element 
@@ -272,23 +277,8 @@ let update game st =
   (* print_endline (string_of_bool (st.animate=100)); *)
   (* if st.animate mod 7500 = 0 then erase_time st; *)
   render_time result;
-  render_moving result; 
+  render_block st.moving_block (blockref_x st) (blockref_y st) st.current_orientation; 
   result
-
-let rotate string st game = 
-  let new_shape = {
-    blockref = add_blockref st 0 0;
-    moving_block = st.moving_block;
-    time = st.time;
-    queue = st.queue;
-    won = st.won;
-    dropped = st.dropped;
-    animate = st.animate;
-    rows_left = st.rows_left;
-    current_orientation = 
-      next_orientation string game st.moving_block st.current_orientation
-  }
-  in erase_moving st; new_shape
 
 let rec leftmost_coord acc lst = 
   match lst with
@@ -302,17 +292,69 @@ let rec rightmost_coord acc lst =
   | (x,y)::t -> if x > acc 
     then rightmost_coord x t else rightmost_coord acc t
 
+let rotate string st game = 
+  let new_shape = {
+    blockref = add_blockref st 0 0;
+    moving_block = st.moving_block;
+    time = st.time;
+    queue = st.queue;
+    won = st.won;
+    dropped = st.dropped;
+    animate = st.animate;
+    rows_left = st.rows_left;
+    current_orientation = 
+      next_orientation string game st.moving_block st.current_orientation
+  } in 
+
+  let pixel_list = convert_blk_to_pix_coor st (orientation_coordinates new_shape.current_orientation) [] in 
+  if (leftmost_coord (blockref_x st) pixel_list) <= 50 then  
+    let shifted_right_shape = {
+      blockref = add_blockref st tilesize 0;
+      moving_block = st.moving_block;
+      time = st.time;
+      queue = st.queue;
+      won = st.won;
+      dropped = st.dropped;
+      animate = st.animate;
+      rows_left = st.rows_left;
+      current_orientation = 
+        next_orientation string game st.moving_block st.current_orientation } 
+    in erase_moving st; shifted_right_shape
+  else 
+  if (rightmost_coord (blockref_x st) pixel_list) >= 350 - tilesize then 
+    let shifted_left_shape = {
+      blockref = add_blockref st (-tilesize) 0;
+      moving_block = st.moving_block;
+      time = st.time;
+      queue = st.queue;
+      won = st.won;
+      dropped = st.dropped;
+      animate = st.animate;
+      rows_left = st.rows_left;
+      current_orientation = 
+        next_orientation string game st.moving_block st.current_orientation } 
+    in erase_moving st; shifted_left_shape
+  else  let new_shape = {
+      blockref = add_blockref st 0 0;
+      moving_block = st.moving_block;
+      time = st.time;
+      queue = st.queue;
+      won = st.won;
+      dropped = st.dropped;
+      animate = st.animate;
+      rows_left = st.rows_left;
+      current_orientation = 
+        next_orientation string game st.moving_block st.current_orientation
+    } in erase_moving st; new_shape
+
+
 let move direction st =
   let  pixel_list = convert_blk_to_pix_coor st (orientation_coordinates st.current_orientation) [] in 
 
   if ((leftmost_coord (blockref_x st) (pixel_list)) <= 50 
       && direction = "left") then st
   else 
-<<<<<<< HEAD
-  if (rightmost_coord (blockref_x st) (pixel_list)) >= 350 
-=======
   if (rightmost_coord (blockref_x st) (pixel_list)) >= 350 - tilesize  
->>>>>>> 82ae776e1dab0fadf3eaf3d38dd15dd74402adfe
   && direction = "right" then st 
   else 
   if direction = "right" then 
