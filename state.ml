@@ -370,6 +370,7 @@ let rec parse_dropped dropped coords curr_col acc=
     let y = coord_y h in 
     let temp_col = curr_col + x in
     let temp = find_lowest_y dropped temp_col in 
+    (* print_endline (string_of_int temp); *)
     let updated = 
       if temp = (fst acc) 
       then
@@ -382,37 +383,25 @@ let rec parse_dropped dropped coords curr_col acc=
         else acc in 
     parse_dropped dropped t curr_col updated
 
-let rec add_to_dropped dropped color coords target_cell y_target_coord curr_col lowest_coord= 
+let rec add_to_dropped dropped color coords target_cell y_target_coord curr_col= 
   match coords with 
   | [] -> ()
   | h::t -> 
     let x = coord_x h in 
     let y = coord_y h in 
-    (* print_endline "---------------------------";
-    print_endline (string_of_int target_cell);
-    print_endline (string_of_int (-y_target_coord));
-    print_endline (string_of_int y);
-    print_endline (string_of_int (-lowest_coord));
-    print_endline (string_of_int (target_cell-y_target_coord+y-lowest_coord)); *)
-    add_coordinate dropped (curr_col+x) (target_cell-y_target_coord+y-lowest_coord) color;
-    add_to_dropped dropped color t target_cell y_target_coord curr_col lowest_coord
+    add_coordinate dropped (curr_col+x) (target_cell-y_target_coord+y) color;
+    add_to_dropped dropped color t target_cell y_target_coord curr_col
 
 let curr_col st = 
   let pixels = (blockref_x st)-50 in
   let calc = pixels - (pixels mod tilesize) in (calc/tilesize)
-
-let rec lowest_coord coords acc= 
-  match coords with 
-    | [] -> acc 
-    | h::t -> if (coord_y h) < acc then lowest_coord t (coord_y h) else lowest_coord t acc
-
+  
 let drop st = 
   let color = shape_color st.moving_block in
   let coords = orientation_coordinates st.current_orientation in
   let curr_col = curr_col st in 
-  let (target_cell, y_target_coord) = parse_dropped st.dropped coords curr_col (0,0) in
-  let lowest_coord = lowest_coord coords 0 in
-  add_to_dropped st.dropped color coords target_cell y_target_coord curr_col lowest_coord;
+  let (target_cell, y_target_coord) = parse_dropped st.dropped coords curr_col (-4, -4) in
+  add_to_dropped st.dropped color coords (target_cell+1) y_target_coord curr_col;
   erase_moving st;
   render_array st.dropped 0 0;
   {
