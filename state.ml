@@ -24,11 +24,26 @@ let rec init_q length acc t =
   | n when n = 0 -> acc
   | _ -> init_q (length-1) ((rand_shape t)::acc) t
 
+(** [start] is a reference to the time that the game has started *)
+let start = ref (Unix.time ())
+
+(** [time ()] is the amount of time in seconds since the game has started. 
+    This function will also update the time on the game board. *)
+let time () =
+  set_color black;
+  fill_rect 440 680 100 10;  
+  set_color white;
+  set_text_size 30;
+  moveto 450 680; 
+  let time = int_of_float((Unix.time () -. !start)) in
+  draw_string (string_of_int time);
+  time
+
 let init_state t = {
   blockref = orig_blockref;
   moving_block = None;
   current_orientation = None;
-  time = 0;
+  time = time ();
   queue = init_q 5 [] t;
   won = false;
   dropped = Array.make_matrix 10 20 0;
@@ -74,10 +89,10 @@ let render_block mov_block refx refy orientation =
       let x = coord_x h in
       let y = coord_y h in
       if (refy+y*tilesize) < 700 then
-      (fill_rect (refx+x*tilesize) (refy+y*tilesize) tilesize tilesize;
-      helper t)
+        (fill_rect (refx+x*tilesize) (refy+y*tilesize) tilesize tilesize;
+         helper t)
       else 
-      helper t
+        helper t
   in 
   set_color color; helper (orientation_coordinates orientation)
 
@@ -114,15 +129,15 @@ let erase_moving st =
       let x = coord_x h in
       let y = coord_y h in
       if (refy+y*tilesize) < 700 then
-      (set_color black;
-      fill_rect (refx+x*tilesize) (refy+y*tilesize) tilesize tilesize;
-      set_color darkgrey;
-      draw_rect (refx+x*tilesize) (refy+y*tilesize) tilesize tilesize;
-      helper t)
+        (set_color black;
+         fill_rect (refx+x*tilesize) (refy+y*tilesize) tilesize tilesize;
+         set_color darkgrey;
+         draw_rect (refx+x*tilesize) (refy+y*tilesize) tilesize tilesize;
+         helper t)
       else helper t
   in set_color darkgrey; helper (orientation_coordinates st.current_orientation)
 
-(** [render_time st] draws the rows remaining from [st] into the board.*)
+(** [render_lines_remaining st] draws the rows remaining from [st] into the board.*)
 let render_lines_remaining st =
   set_color white;
   set_text_size 30;
@@ -133,18 +148,6 @@ let render_lines_remaining st =
 let erase_lines_remaining st = 
   set_color black;
   fill_rect 490 700 30 100 
-
-(** [render_time st] draws the time integer into the board.*)
-let render_time st =
-  set_color white;
-  set_text_size 30;
-  moveto 450 680;
-  draw_string (string_of_int st.time)
-
-(** [erase_time st] redraws the window over the time. *)
-let erase_time st = 
-  set_color black;
-  fill_rect 450 680 30 100  
 
 let find_height shape = 
   3
@@ -169,9 +172,9 @@ let pop queue game =
     in [column] at [idx] and lower with a value greater than 0 *)
 let rec find_lowest_y_helper column idx = 
   if idx < 0 then -1 else 
-  match column.(idx) with
-  | n when n > 0 -> (idx)
-  | _ -> find_lowest_y_helper column (idx-1)
+    match column.(idx) with
+    | n when n > 0 -> (idx)
+    | _ -> find_lowest_y_helper column (idx-1)
 
 (** finds the highest cell that is filled*)
 let find_lowest_y dropped column =
@@ -238,7 +241,7 @@ let update game st =
         blockref = st.blockref;
         moving_block = Some new_shape;
         current_orientation = orientation_init new_shape;
-        time = st.time;
+        time = time ();
         queue = new_queue;
         won = st.won;
         dropped = st.dropped;
@@ -250,7 +253,7 @@ let update game st =
         blockref = if st.animate mod 100 = 0 then add_blockref st 0 (-tilesize) else st.blockref;
         moving_block = st.moving_block;
         current_orientation = st.current_orientation;
-        time = st.time;
+        time = time ();
         queue = st.queue;
         won = st.won;
         dropped= st.dropped;
@@ -258,7 +261,6 @@ let update game st =
         rows_left = st.rows_left;
       }) in 
   if st.animate mod 100 = 0 then erase_moving st;
-  render_time result;
   render_block result.moving_block (blockref_x result) (blockref_y result) st.current_orientation; 
   result
 
@@ -378,9 +380,9 @@ let rec parse_dropped dropped coords curr_col acc=
         then acc 
         else (temp, y)
       else 
-        if temp > (fst acc)
-        then (temp, y) 
-        else acc in 
+      if temp > (fst acc)
+      then (temp, y) 
+      else acc in 
     parse_dropped dropped t curr_col updated
 
 let rec add_to_dropped dropped color coords target_cell y_target_coord curr_col= 
@@ -395,7 +397,7 @@ let rec add_to_dropped dropped color coords target_cell y_target_coord curr_col=
 let curr_col st = 
   let pixels = (blockref_x st)-50 in
   let calc = pixels - (pixels mod tilesize) in (calc/tilesize)
-  
+
 let drop st = 
   let color = shape_color st.moving_block in
   let coords = orientation_coordinates st.current_orientation in
