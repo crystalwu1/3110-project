@@ -33,10 +33,10 @@ let start = ref (Unix.time ())
     This function will also update the time on the game board. *)
 let time () =
   set_color black;
-  fill_rect 440 680 100 10;  
+  fill_rect 540 680 100 10;  
   set_color white;
   set_text_size 30;
-  moveto 450 680; 
+  moveto 550 680; 
   let time = int_of_float((Unix.time () -. !start)) in
   draw_string (string_of_int time);
   time
@@ -151,20 +151,20 @@ let erase_block st refx refy orientation =
 (** [erase_lines_remaining st] redraws the window over the rows remaining. *)
 let erase_lines_remaining () = 
   set_color black;
-  fill_rect 510 700 30 100 
+  fill_rect 610 700 30 100 
 
 (** [render_lines_remaining st] draws the rows remaining from [st] into the board.*)
 let render_lines_remaining num =
   erase_lines_remaining ();
   set_color white;
   set_text_size 30;
-  moveto 510 700;
+  moveto 610 700;
   draw_string (string_of_int num);
   num
 
 let erase_q () = 
   set_color black;
-  fill_rect 360 0 200 650
+  fill_rect 460 0 200 650
 
 let rec render_q q dx dy =
   match q with
@@ -175,7 +175,7 @@ let rec render_q q dx dy =
 let pop queue game = 
   match queue with 
   | x::t -> let q = (t@(rand_shape game::[])) in 
-    erase_q () ; render_q q 440 570; (x, q)
+    erase_q () ; render_q q 540 570; (x, q)
   | [] -> raise NoMoreBlocks
 
 (** [find_lowest_y_helper] finds the index of the top most element 

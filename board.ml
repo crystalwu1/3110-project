@@ -11,12 +11,12 @@ let tilesize = boardh / 20
 (** [lines_time_q color] writes "Lines Remaining:", "Time:", and 
     "Queue:" in [color] .*)
 let lines_time_q color = 
-  moveto 410 700;
+  moveto 510 700;
   set_color color;
   draw_string ("Lines Remaining:");
-  moveto 410 680;
+  moveto 510 680;
   draw_string ("Time:");
-  moveto 410 660;
+  moveto 510 660;
   draw_string ("Queue:")
 
 (** [clear_window color] fills in the background of the window with [color] .*)
