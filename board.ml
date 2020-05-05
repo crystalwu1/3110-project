@@ -1,6 +1,6 @@
 open Graphics
 
-let startx = 100
+let startx = 125
 let starty = 100
 let boardw = 300
 let boardh = 600
@@ -52,7 +52,7 @@ let directions () =
   failwith ""
 
 let make_window () = 
-  open_graph " 600x800";
+  open_graph " 700x800";
   set_window_title "tetris";
   clear_window black;
   create_board ();

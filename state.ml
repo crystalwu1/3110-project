@@ -259,10 +259,9 @@ let rec rightmost_coord acc lst =
 
 let hold st = 
   erase_block st (blockref_x st) (blockref_y st) st.current_orientation; 
+  set_color black;
   fill_rect 0 480 50 50;
   render_block st.moving_block 25 500 (shape_color st.moving_block) st.current_orientation;
-
-
 
   let new_current_shape = {
     blockref = add_blockref st 0 0;
