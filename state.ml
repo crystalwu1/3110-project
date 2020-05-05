@@ -258,10 +258,12 @@ let hold st =
      animate = st.animate;
      rows_left = st.rows_left;
      current_orientation = st.current_orientation } in *)
-  erase_moving st;
+  (* erase_moving st;
 
-  erase_moving st.hold;
+     erase_moving st.hold; *)
   render_block st.moving_block 25 500 st.current_orientation;
+
+
 
   let new_current_shape = {
     blockref = add_blockref st 0 0;
@@ -275,6 +277,8 @@ let hold st =
     rows_left = st.rows_left;
     current_orientation = st.current_orientation } in 
   new_current_shape
+
+let won st = st.won 
 
 let rotate string st game = 
   let new_shape = {
@@ -304,7 +308,7 @@ let rotate string st game =
       rows_left = st.rows_left;
       current_orientation = 
         next_orientation string game st.moving_block st.current_orientation } 
-    in erase_block st (blockref_x st) (blockref_y st) st.current_orientation st.current_orientation; shifted_right_shape
+    in erase_block st (blockref_x st) (blockref_y st) st.current_orientation; shifted_right_shape
   else 
   if (rightmost_coord (blockref_x st) pixel_list) >= 350 - tilesize then 
     let shifted_left_shape = {
@@ -355,7 +359,9 @@ let move direction st =
       won = st.won;
       dropped= st.dropped;
       animate = st.animate;
-      rows_left = st.rows_left } in  erase_block st (blockref_x st) (blockref_y st) st.current_orientation; new_shape
+      rows_left = st.rows_left } in 
+    erase_block st (blockref_x st) (blockref_y st) st.current_orientation; 
+    new_shape
   else  
     let new_shape = {
       blockref = add_blockref st (-tilesize) 0;
@@ -428,6 +434,11 @@ let drop st =
 let curr_row st =
   (blockref_y st - 100) / tilesize
 
+let coord_to_pix axis num = 
+  if axis = "x" 
+  then 50 + (num * tilesize)
+  else 100 + (num * tilesize)
+
 let update game st = 
   let result = 
     if st.moving_block = None then 
@@ -463,8 +474,10 @@ let update game st =
   let (target_cell, y_target_coord) = parse_dropped st.dropped coords curr_col (-4, -4) in
   if (curr_row st) - 1 + y_target_coord <= target_cell then drop result else
     (if (Unix.time ()) -. st.animate = 1. then erase_block st (blockref_x st) (blockref_y st) st.current_orientation;
+     render_block result.moving_block (blockref_x st) (coord_to_pix "y" (target_cell + 1)) st.current_orientation;
      render_block result.moving_block (blockref_x result) (blockref_y result) st.current_orientation; 
      result)
+
 
 
 
