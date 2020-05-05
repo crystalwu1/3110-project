@@ -276,6 +276,31 @@ let rec rightmost_coord acc lst =
   | (x,y)::t -> if x > acc 
     then rightmost_coord x t else rightmost_coord acc t
 
+let hold st = 
+  let current_shape = {
+    blockref = add_blockref st 0 0;
+    moving_block = st.moving_block;
+    time = st.time;
+    queue = st.queue;
+    won = st.won;
+    dropped = st.dropped;
+    animate = st.animate;
+    rows_left = st.rows_left;
+    current_orientation = st.current_orientation } in
+
+  let hold_shape = {
+    blockref = add_blockref st 0 400;
+    moving_block = st.moving_block;
+    time = st.time;
+    queue = st.queue;
+    won = st.won;
+    dropped = st.dropped;
+    animate = st.animate;
+    rows_left = st.rows_left;
+    current_orientation = st.current_orientation
+  } in erase_moving st; render_block hold_shape.moving_block 50 100 st.current_orientation;
+  current_shape
+
 let rotate string st game = 
   let new_shape = {
     blockref = add_blockref st 0 0;
@@ -290,7 +315,7 @@ let rotate string st game =
       next_orientation string game st.moving_block st.current_orientation
   } in 
   let pixel_list = convert_blk_to_pix_coor st (orientation_coordinates new_shape.current_orientation) [] in 
-  if (leftmost_coord (blockref_x st) pixel_list) <= 50 then  
+  if (leftmost_coord (blockref_x st) pixel_list) <= 150 then  
     let shifted_right_shape = {
       blockref = add_blockref st tilesize 0;
       moving_block = st.moving_block;
@@ -334,7 +359,7 @@ let rotate string st game =
 let move direction st =
   let  pixel_list = convert_blk_to_pix_coor st (orientation_coordinates st.current_orientation) [] in 
 
-  if ((leftmost_coord (blockref_x st) (pixel_list)) <= 50 
+  if ((leftmost_coord (blockref_x st) (pixel_list)) <= 150 
       && direction = "left") then st
   else 
   if (rightmost_coord (blockref_x st) (pixel_list)) >= 350 - tilesize  
