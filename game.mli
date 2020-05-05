@@ -25,6 +25,8 @@ val parse : Yojson.Basic.t -> t
 
 val shape_color : shape option -> int
 
+val orientation_name : orientation option -> string
+
 val shape_orientations : shape option -> orientation list
 
 val orientation_coordinates : orientation option -> coordinate list 

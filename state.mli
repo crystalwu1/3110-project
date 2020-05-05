@@ -2,6 +2,8 @@ open Graphics
 open Board
 open Game
 
+exception GameOver
+
 type t 
 
 val init_state : Game.t -> t

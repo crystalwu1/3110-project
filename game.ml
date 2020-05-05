@@ -65,6 +65,11 @@ let shape_orientations shpe =
   | None -> []
   | Some thing -> thing.orientations
 
+let orientation_name orientation = 
+  match orientation with 
+  | None -> "none"
+  | Some x -> x.orient_name
+
 let orientation_coordinates orient =
   match orient with 
   | None -> []

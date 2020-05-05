@@ -11,14 +11,17 @@ let rec read_helper () =
 
 let rec run_game game st  = 
   (* print_endline "running"; *)
-  if won st then ()  
-  else try let x = keyboard game st in x |> update game |> run_game game with 
-    | NoKeyPress -> run_game game (update game st)
+  try let x = keyboard game st in x |> update game |> run_game game with 
+  | NoKeyPress -> run_game game (update game st)
+  | GameOver -> begin try let again = end_keyboard () in if again then main () else () with
+      | NoKeyPress -> run_game game (update game st) 
+    end
+(* | NoKeyPress -> run_game game (update game st) *)
 
-let start_game f = let game = f |>  Yojson.Basic.from_file |> parse in 
+and start_game f = let game = f |>  Yojson.Basic.from_file |> parse in 
   run_game game (init_state game) 
 
-let main () = 
+and main () = 
   (* ANSITerminal.(print_string [red]
                   "\n\nWelcome to OCaml Tetris.\n");
      print_endline "Please enter the name of the Tetris mode you want to play.\n";

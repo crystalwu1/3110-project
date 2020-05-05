@@ -15,5 +15,7 @@ val boardh : int
 (** The size of the sub-block that create Tetris pieces. *)
 val tilesize : int
 
+val create_board : unit -> unit
+
 (** [make_window] is a graphical window with a Tetris board in it.*)
 val make_window : unit -> unit
