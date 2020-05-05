@@ -13,10 +13,7 @@ let rec run_game game st  =
   (* print_endline "running"; *)
   try let x = keyboard game st in x |> update game |> run_game game with 
   | NoKeyPress -> run_game game (update game st)
-  | GameOver -> begin try let again = end_keyboard () in if again then main () else () with
-      | NoKeyPress -> run_game game (update game st) 
-    end
-(* | NoKeyPress -> run_game game (update game st) *)
+  | GameOver -> let again = end_keyboard () in if again then main () else () 
 
 and start_game f = let game = f |>  Yojson.Basic.from_file |> parse in 
   run_game game (init_state game) 

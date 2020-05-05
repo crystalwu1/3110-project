@@ -6,6 +6,7 @@ open State
 open Unix
 
 exception NoKeyPress
+exception GameOver
 
 val keyboard : Game.t -> State.t -> (State.t)
 

@@ -6,7 +6,7 @@ let darkgrey = rgb 40 40 40
 let orig_blockref = (startx + (boardw/2), starty + boardh -tilesize)
 
 exception NoMoreBlocks
-exception GameOver
+exception GameWon
 
 type t = {
   blockref : int * int; 
@@ -41,19 +41,21 @@ let time () =
   draw_string (string_of_int time);
   time
 
-let init_state t = {
-  blockref = orig_blockref;
-  moving_block = None;
-  hold = None;
-  current_orientation = None;
-  time = time ();
-  queue = init_q 5 [] t;
-  won = false;
-  dropped = Array.make_matrix 10 20 0;
-  animate = Unix.time ();
-  rows_left = 40; 
-  (* ^ we can chane this to a user input at some point *)
-}
+let init_state t = 
+  start := (Unix.time ());
+  {
+    blockref = orig_blockref;
+    moving_block = None;
+    hold = None;
+    current_orientation = None;
+    time = time ();
+    queue = init_q 5 [] t;
+    won = false;
+    dropped = Array.make_matrix 10 20 0;
+    animate = Unix.time ();
+    rows_left = 1; 
+    (* ^ we can chane this to a user input at some point *)
+  }
 let blockref_x st = 
   match st.blockref with
   | (x, _) -> x
@@ -290,8 +292,10 @@ let display_win_message time =
   set_color black;
   fill_rect 0 0 700 800;
   set_color white;
-  moveto 225 370;
-  draw_string ("Congratulations! You win! You time is " ^ (string_of_int time) ^ ". Nice job.")
+  moveto 190 370;
+  draw_string ("Congratulations! You win! You time is " ^ (string_of_int time) ^ ". Nice job.");
+  moveto 260 350;
+  draw_string ("Press 'y' to play again.")
 
 
 let win time rows_left = 
@@ -331,6 +335,13 @@ let rec add_to_dropped dropped color coords target_cell y_target_coord curr_col=
     add_coordinate dropped (curr_col+x) (target_cell-y_target_coord+y) color;
     add_to_dropped dropped color t target_cell y_target_coord curr_col
 
+let rec update_after_row_rem drop x y  = 
+  set_color drop.(x).(y);
+  fill_rect (x*tilesize+startx) (y*tilesize+starty) tilesize tilesize;
+  if x > 8 then 
+    if y > 18 then () else update_after_row_rem drop 0 (y+1)
+  else update_after_row_rem drop (x+1) y
+
 let drop st = 
   let color = shape_color st.moving_block in
   let coords = orientation_coordinates st.current_orientation in
@@ -354,9 +365,11 @@ let drop st =
       won = st.won;
       dropped= st.dropped;
       animate = st.animate;
-      rows_left = st.rows_left;
+      rows_left = render_lines_remaining st.rows_left;
     } in
-  if (win new_st.time new_st.rows_left) > 0 then new_st else raise GameOver
+  let final_res = row_remove new_st in
+  update_after_row_rem final_res.dropped 0 0;
+  if (win final_res.time final_res.rows_left) > 0 then final_res else raise GameWon
 
 let rotate string st game = 
   let new_shape = {
@@ -451,13 +464,6 @@ let move direction st =
       dropped = st.dropped;
       animate = st.animate;
       rows_left = st.rows_left } in erase_block st (blockref_x st) (blockref_y st) st.current_orientation; new_shape
-
-let rec update_after_row_rem drop x y  = 
-  set_color drop.(x).(y);
-  fill_rect (x*tilesize+startx) (y*tilesize+starty) tilesize tilesize;
-  if x > 8 then 
-    if y > 18 then () else update_after_row_rem drop 0 (y+1)
-  else update_after_row_rem drop (x+1) y
 
 let update game st = 
   let final_res = row_remove st in

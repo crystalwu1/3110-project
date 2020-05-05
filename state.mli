@@ -2,7 +2,7 @@ open Graphics
 open Board
 open Game
 
-exception GameOver
+exception GameWon
 
 type t 
 
