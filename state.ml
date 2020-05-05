@@ -458,7 +458,7 @@ let update game st =
         won = st.won;
         dropped = st.dropped;
         animate = st.animate;
-        rows_left = st.rows_left;
+        rows_left = render_lines_remaining final_res.rows_left;
       }
     else (
       {
