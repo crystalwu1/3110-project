@@ -281,7 +281,7 @@ let hold st =
     current_orientation = 
       match st.hold with 
       | Some h -> orientation_init h
-      | None -> failwith "no orientation"}  in 
+      | None -> None}  in 
   render_block (new_current_shape.moving_block)  (blockref_x new_current_shape)
     (blockref_y new_current_shape) (shape_color new_current_shape.moving_block) new_current_shape.current_orientation;
   new_current_shape
@@ -490,7 +490,7 @@ let update game st =
   let (target_cell, y_target_coord) = parse_dropped st.dropped coords curr_col (-4, -4) in
   if (curr_row st) - 1 + y_target_coord <= target_cell then drop result else
     (if (Unix.time ()) -. st.animate = 1. then erase_block st (blockref_x st) (blockref_y st) st.current_orientation;
-     render_block result.moving_block (blockref_x st) (coord_to_pix "y" (target_cell + 1)) (shape_color st.moving_block) st.current_orientation;
+     (* render_block result.moving_block (blockref_x st) (coord_to_pix "y" (target_cell + 1)) (shape_color st.moving_block) st.current_orientation; *)
      render_block result.moving_block (blockref_x result) (blockref_y result) (shape_color st.moving_block) st.current_orientation; 
      result)
 
