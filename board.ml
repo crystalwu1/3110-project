@@ -1,6 +1,6 @@
 open Graphics
 
-let startx = 150
+let startx = 50
 let starty = 100
 let boardw = 300
 let boardh = 600

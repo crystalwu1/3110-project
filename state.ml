@@ -10,6 +10,7 @@ exception NoMoreBlocks
 type t = {
   blockref : int * int; 
   moving_block : Game.shape option;
+  hold : Game.shape option; 
   current_orientation : Game.orientation option;
   time : int;
   queue : Game.shape list;
@@ -42,6 +43,7 @@ let time () =
 let init_state t = {
   blockref = orig_blockref;
   moving_block = None;
+  hold = None;
   current_orientation = None;
   time = time ();
   queue = init_q 5 [] t;
@@ -224,6 +226,7 @@ let row_remove st =
   {
     blockref = st.blockref; 
     moving_block = st.moving_block;
+    hold = st.hold; 
     current_orientation = st.current_orientation;
     time = st.time;
     queue = st.queue;
@@ -240,6 +243,7 @@ let update game st =
       {
         blockref = st.blockref;
         moving_block = Some new_shape;
+        hold = st.hold; 
         current_orientation = orientation_init new_shape;
         time = time ();
         queue = new_queue;
@@ -252,6 +256,7 @@ let update game st =
       {
         blockref = if st.animate mod 100 = 0 then add_blockref st 0 (-tilesize) else st.blockref;
         moving_block = st.moving_block;
+        hold = st.hold;
         current_orientation = st.current_orientation;
         time = time ();
         queue = st.queue;
@@ -277,34 +282,40 @@ let rec rightmost_coord acc lst =
     then rightmost_coord x t else rightmost_coord acc t
 
 let hold st = 
-  let current_shape = {
-    blockref = add_blockref st 0 0;
-    moving_block = st.moving_block;
-    time = st.time;
-    queue = st.queue;
-    won = st.won;
-    dropped = st.dropped;
-    animate = st.animate;
-    rows_left = st.rows_left;
-    current_orientation = st.current_orientation } in
+  (* let current_shape = {
+     blockref = add_blockref st 0 0;
+     moving_block = st.moving_block;
+     hold = st.hold;
+     time = st.time;
+     queue = st.queue;
+     won = st.won;
+     dropped = st.dropped;
+     animate = st.animate;
+     rows_left = st.rows_left;
+     current_orientation = st.current_orientation } in *)
+  erase_moving st;
 
-  let hold_shape = {
-    blockref = add_blockref st 0 400;
-    moving_block = st.moving_block;
+  erase_moving st.hold;
+  render_block st.moving_block 25 500 st.current_orientation;
+
+  let new_current_shape = {
+    blockref = add_blockref st 0 0;
+    moving_block = st.hold;
+    hold = st.moving_block;
     time = st.time;
     queue = st.queue;
     won = st.won;
     dropped = st.dropped;
     animate = st.animate;
     rows_left = st.rows_left;
-    current_orientation = st.current_orientation
-  } in erase_moving st; render_block hold_shape.moving_block 50 100 st.current_orientation;
-  current_shape
+    current_orientation = st.current_orientation } in 
+  new_current_shape
 
 let rotate string st game = 
   let new_shape = {
     blockref = add_blockref st 0 0;
     moving_block = st.moving_block;
+    hold = st.hold;
     time = st.time;
     queue = st.queue;
     won = st.won;
@@ -315,10 +326,11 @@ let rotate string st game =
       next_orientation string game st.moving_block st.current_orientation
   } in 
   let pixel_list = convert_blk_to_pix_coor st (orientation_coordinates new_shape.current_orientation) [] in 
-  if (leftmost_coord (blockref_x st) pixel_list) <= 150 then  
+  if (leftmost_coord (blockref_x st) pixel_list) <= 50 then  
     let shifted_right_shape = {
       blockref = add_blockref st tilesize 0;
       moving_block = st.moving_block;
+      hold = st.hold;
       time = st.time;
       queue = st.queue;
       won = st.won;
@@ -333,6 +345,7 @@ let rotate string st game =
     let shifted_left_shape = {
       blockref = add_blockref st (-tilesize) 0;
       moving_block = st.moving_block;
+      hold = st.hold;
       time = st.time;
       queue = st.queue;
       won = st.won;
@@ -345,6 +358,7 @@ let rotate string st game =
   else  let new_shape = {
       blockref = add_blockref st 0 0;
       moving_block = st.moving_block;
+      hold = st.hold;
       time = st.time;
       queue = st.queue;
       won = st.won;
@@ -359,7 +373,7 @@ let rotate string st game =
 let move direction st =
   let  pixel_list = convert_blk_to_pix_coor st (orientation_coordinates st.current_orientation) [] in 
 
-  if ((leftmost_coord (blockref_x st) (pixel_list)) <= 150 
+  if ((leftmost_coord (blockref_x st) (pixel_list)) <= 50 
       && direction = "left") then st
   else 
   if (rightmost_coord (blockref_x st) (pixel_list)) >= 350 - tilesize  
@@ -369,6 +383,7 @@ let move direction st =
     let new_shape = {
       blockref = add_blockref st tilesize 0;
       moving_block = st.moving_block;
+      hold = st.hold;
       current_orientation = st.current_orientation;
       time = st.time;
       queue = st.queue;
@@ -380,6 +395,7 @@ let move direction st =
     let new_shape = {
       blockref = add_blockref st (-tilesize) 0;
       moving_block = st.moving_block;
+      hold = st.hold;
       current_orientation = st.current_orientation;
       time = st.time;
       queue = st.queue;
@@ -434,6 +450,7 @@ let drop st =
   {
     blockref = orig_blockref;
     moving_block = None;
+    hold = st.hold;
     current_orientation = None;
     time = st.time;
     queue = st.queue;
