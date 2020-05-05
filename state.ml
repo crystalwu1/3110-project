@@ -63,6 +63,13 @@ let blockref_y st =
   match st.blockref with
   | (_, y) -> y
 
+let curr_row st =
+  (blockref_y st - 100) / tilesize
+
+let curr_col st = 
+  let pixels = (blockref_x st)-50 in
+  let calc = pixels - (pixels mod tilesize) in (calc/tilesize)
+
 (** [convert_blk_to_pix_coor st lst acc] is a list of pixel coordinates 
     calculated from the [blockref] value in [st] and the block coordinates
     from [lst] combined with the pixel coordinates in [acc] *)
@@ -111,11 +118,11 @@ let rec render_array dropped x y =
       else (render_array dropped x (y+1))
     else 
     if (x=9 && y=19) 
-    then fill_rect (x*tilesize+50) (y*tilesize+100) tilesize tilesize
+    then fill_rect (x*tilesize+startx) (y*tilesize+starty) tilesize tilesize
     else 
     if y=19 
-    then (set_color dropped.(x).(y); fill_rect (x*tilesize+50) (y*tilesize+100) tilesize tilesize; render_array dropped (x+1) 0)
-    else (set_color dropped.(x).(y); fill_rect (x*tilesize+50) (y*tilesize+100) tilesize tilesize; render_array dropped x (y+1)
+    then (set_color dropped.(x).(y); fill_rect (x*tilesize+startx) (y*tilesize+starty) tilesize tilesize; render_array dropped (x+1) 0)
+    else (set_color dropped.(x).(y); fill_rect (x*tilesize+startx) (y*tilesize+starty) tilesize tilesize; render_array dropped x (y+1)
          ))
 
 (** [erase_block] redraws the background grid in the shape of the currently 
@@ -251,17 +258,6 @@ let rec rightmost_coord acc lst =
     then rightmost_coord x t else rightmost_coord acc t
 
 let hold st = 
-  (* let current_shape = {
-     blockref = add_blockref st 0 0;
-     moving_block = st.moving_block;
-     hold = st.hold;
-     time = st.time;
-     queue = st.queue;
-     won = st.won;
-     dropped = st.dropped;
-     animate = st.animate;
-     rows_left = st.rows_left;
-     current_orientation = st.current_orientation } in *)
   erase_block st (blockref_x st) (blockref_y st) st.current_orientation; 
   fill_rect 0 480 50 50;
   render_block st.moving_block 25 500 (shape_color st.moving_block) st.current_orientation;
@@ -303,7 +299,7 @@ let rotate string st game =
       next_orientation string game st.moving_block st.current_orientation
   } in 
   let pixel_list = convert_blk_to_pix_coor st (orientation_coordinates new_shape.current_orientation) [] in 
-  if (leftmost_coord (blockref_x st) pixel_list) <= 50 then  
+  if (leftmost_coord (blockref_x st) pixel_list) <= startx then  
     let shifted_right_shape = {
       blockref = add_blockref st tilesize 0;
       moving_block = st.moving_block;
@@ -350,7 +346,7 @@ let rotate string st game =
 let move direction st =
   let  pixel_list = convert_blk_to_pix_coor st (orientation_coordinates st.current_orientation) [] in 
 
-  if ((leftmost_coord (blockref_x st) (pixel_list)) <= 50 
+  if ((leftmost_coord (blockref_x st) (pixel_list)) <= startx 
       && direction = "left") then st
   else 
   if (rightmost_coord (blockref_x st) (pixel_list)) >= 350 - tilesize  
@@ -414,10 +410,6 @@ let rec add_to_dropped dropped color coords target_cell y_target_coord curr_col=
     add_coordinate dropped (curr_col+x) (target_cell-y_target_coord+y) color;
     add_to_dropped dropped color t target_cell y_target_coord curr_col
 
-let curr_col st = 
-  let pixels = (blockref_x st)-50 in
-  let calc = pixels - (pixels mod tilesize) in (calc/tilesize)
-
 let drop st = 
   let color = shape_color st.moving_block in
   let coords = orientation_coordinates st.current_orientation in
@@ -439,16 +431,14 @@ let drop st =
     rows_left = st.rows_left;
   }
 
-let curr_row st =
-  (blockref_y st - 100) / tilesize
-
 let coord_to_pix axis num = 
   if axis = "x" 
-  then 50 + (num * tilesize)
-  else 100 + (num * tilesize)
+  then startx + (num * tilesize)
+  else starty + (num * tilesize)
+
 let rec update_after_row_rem drop x y  = 
   set_color drop.(x).(y);
-  fill_rect (x*tilesize+50) (y*tilesize+100) tilesize tilesize;
+  fill_rect (x*tilesize+startx) (y*tilesize+starty) tilesize tilesize;
   if x > 8 then 
     if y > 18 then () else update_after_row_rem drop 0 (y+1)
   else update_after_row_rem drop (x+1) y
