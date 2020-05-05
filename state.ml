@@ -137,20 +137,19 @@ let erase_moving st =
       else helper t
   in set_color darkgrey; helper (orientation_coordinates st.current_orientation)
 
+(** [erase_lines_remaining st] redraws the window over the rows remaining. *)
+let erase_lines_remaining () = 
+  set_color black;
+  fill_rect 510 700 30 100 
+
 (** [render_lines_remaining st] draws the rows remaining from [st] into the board.*)
-let render_lines_remaining st =
+let render_lines_remaining num =
+  erase_lines_remaining ();
   set_color white;
   set_text_size 30;
-  moveto 490 700;
-  draw_string (string_of_int st.rows_left)
-
-(** [erase_lines_remaining st] redraws the window over the rows remaining. *)
-let erase_lines_remaining st = 
-  set_color black;
-  fill_rect 490 700 30 100 
-
-let find_height shape = 
-  3
+  moveto 510 700;
+  draw_string (string_of_int num);
+  num
 
 let erase_q () = 
   set_color black;
@@ -188,14 +187,15 @@ let add_coordinate dropped x y color =
     element in row [y] starting at position [x] and false otherwise *)
 let rec can_remove dropped y x =
   if dropped.(x).(y) > 0 then 
-    if x = 9 then true
+    if x = 9 then (true, dropped)
     else can_remove dropped y (x+1)
-  else false
+  else (false, dropped)
 
 (** [make_val dropped y x valu] sets the element at position 
     ([x], [y]) in the array [dropped] to [value] *)
 let make_val dropped y x value = 
-  dropped.(x).(y) <- value
+  dropped.(x).(y) <- value;
+  dropped
 
 (** [rem_row dropped y x] will replace all values beginning at ([x],[y]) 
     with the value at position ([x],[y+1]) to remove the row [y]. 
@@ -204,23 +204,27 @@ let make_val dropped y x value =
 let rec rem_row dropped y x =
   if y = 19 then 
     if x = 9 then make_val dropped y x 0
-    else (make_val dropped y x 0; rem_row dropped y (x+1))
+    else let dr = make_val dropped y x 0 in rem_row dr y (x+1)
   else 
-  if x = 9 then (make_val dropped y x dropped.(x).(y+1); 
-                 rem_row dropped (y+1) 0)
-  else make_val dropped y x dropped.(x).(y+1); rem_row dropped y (x+1)
+  if x = 9 then let dr2 = make_val dropped y x dropped.(x).(y+1) in
+    rem_row dr2 (y+1) 0
+  else let dr3 = make_val dropped y x dropped.(x).(y+1) in 
+    rem_row dr3 y (x+1)
 
 (** [row_remove_helper dropped pos rows_removed] will remove the full 
     rows in [dropped] starting at the y coordinate [pos] and returns the 
     number of rows that have been removed in addition to [rows_removed] *)
 let rec row_remove_helper dropped pos rows_removed = 
-  if (can_remove dropped pos 0) 
-  then (rem_row dropped pos 0; 
-        row_remove_helper dropped (pos+1) (rows_removed+1))
-  else row_remove_helper dropped (pos+1) (rows_removed)
+  if pos < 20 then
+    match (can_remove dropped pos 0) with
+    | (true, dr) -> 
+      let dr2 = (rem_row dr pos 0) in
+      row_remove_helper dr2 (pos+1) (rows_removed+1)
+    | (false, dr) -> row_remove_helper dr (pos+1) (rows_removed)
+  else (rows_removed, dropped)
 
 let row_remove st =
-  let new_rows_removed = row_remove_helper st.dropped 0 0 in
+  let (new_rows_removed, drop) = row_remove_helper st.dropped 0 0 in
   {
     blockref = st.blockref; 
     moving_block = st.moving_block;
@@ -228,10 +232,17 @@ let row_remove st =
     time = st.time;
     queue = st.queue;
     won = st.won;
-    dropped = st.dropped;
+    dropped = drop;
     animate = st.animate;
     rows_left = st.rows_left - new_rows_removed;
   }
+
+let rec update_after_row_rem dropped x y  =
+  set_color dropped.(x).(y);
+  fill_rect (x*tilesize+50) (y*tilesize+100) tilesize tilesize; 
+  if x > 8 then
+    if y > 18 then () else update_after_row_rem dropped 0 (y+1)
+  else update_after_row_rem dropped (x+1) y
 
 let update game st = 
   let result = 
@@ -258,11 +269,13 @@ let update game st =
         won = st.won;
         dropped= st.dropped;
         animate = if st.animate mod 100 = 0 then 1 else st.animate +1;
-        rows_left = st.rows_left;
+        rows_left = render_lines_remaining st.rows_left;
       }) in 
   if st.animate mod 100 = 0 then erase_moving st;
+  let final_res = row_remove result in
+  update_after_row_rem final_res.dropped 0 0;
   render_block result.moving_block (blockref_x result) (blockref_y result) st.current_orientation; 
-  result
+  final_res
 
 let rec leftmost_coord acc lst = 
   match lst with
