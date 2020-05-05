@@ -19,6 +19,9 @@ type t = {
   animate : float;
   rows_left : int;
 }
+
+let won st = st.won 
+
 (** [init_q length acc t] initializes a [Game.shape list] of random shapes. *)
 let rec init_q length acc t = 
   match length with 
@@ -80,8 +83,7 @@ let add_blockref st num1 num2 =
   | (x, y) -> (x+num1, y+num2)
 
 (** [render_block] draws the current moving_block in [st].*)
-let render_block mov_block refx refy orientation =  
-  let color = shape_color mov_block in
+let render_block mov_block refx refy color orientation =  
   let rec helper coords =
     match coords with
     | [] -> ()
@@ -159,7 +161,7 @@ let erase_q () =
 let rec render_q q dx dy =
   match q with
   | [] -> ()
-  | h::t -> render_block (Some h) dx dy (orientation_init h); 
+  | h::t -> render_block (Some h) dx dy (shape_color (Some h)) (orientation_init h); 
     render_q t dx (dy-(tilesize*(1+(shape_height h))))
 
 let pop queue game = 
@@ -258,10 +260,9 @@ let hold st =
      animate = st.animate;
      rows_left = st.rows_left;
      current_orientation = st.current_orientation } in *)
-  erase_moving st;
-
-  erase_moving st.hold;
-  render_block st.moving_block 25 500 st.current_orientation;
+  erase_block st (blockref_x st) (blockref_y st) st.current_orientation; 
+  fill_rect 0 480 50 50;
+  render_block st.moving_block 25 500 (shape_color st.moving_block) st.current_orientation;
 
   let new_current_shape = {
     blockref = add_blockref st 0 0;
@@ -273,7 +274,12 @@ let hold st =
     dropped = st.dropped;
     animate = st.animate;
     rows_left = st.rows_left;
-    current_orientation = st.current_orientation } in 
+    current_orientation = 
+      match st.hold with 
+      | Some h -> orientation_init h
+      | None -> failwith "no orientation"}  in 
+  render_block (new_current_shape.moving_block)  (blockref_x new_current_shape)
+    (blockref_y new_current_shape) (shape_color new_current_shape.moving_block) new_current_shape.current_orientation;
   new_current_shape
 
 let rotate string st game = 
@@ -304,7 +310,7 @@ let rotate string st game =
       rows_left = st.rows_left;
       current_orientation = 
         next_orientation string game st.moving_block st.current_orientation } 
-    in erase_block st (blockref_x st) (blockref_y st) st.current_orientation st.current_orientation; shifted_right_shape
+    in erase_block st (blockref_x st) (blockref_y st) st.current_orientation; shifted_right_shape
   else 
   if (rightmost_coord (blockref_x st) pixel_list) >= 350 - tilesize then 
     let shifted_left_shape = {
@@ -463,7 +469,7 @@ let update game st =
   let (target_cell, y_target_coord) = parse_dropped st.dropped coords curr_col (-4, -4) in
   if (curr_row st) - 1 + y_target_coord <= target_cell then drop result else
     (if (Unix.time ()) -. st.animate = 1. then erase_block st (blockref_x st) (blockref_y st) st.current_orientation;
-     render_block result.moving_block (blockref_x result) (blockref_y result) st.current_orientation; 
+     render_block result.moving_block (blockref_x result) (blockref_y result) (shape_color result.moving_block) st.current_orientation; 
      result)
 
 
