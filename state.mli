@@ -14,6 +14,8 @@ val won : t -> bool
 
 val update : Game.t -> t -> t
 
+val hold : t -> t
+
 val rotate : string -> t -> Game.t -> t
 
 val move : string -> t -> t
