@@ -417,7 +417,7 @@ let rotate string st game =
         next_orientation string game st.moving_block st.current_orientation } 
     in erase_block (blockref_x st) (blockref_y st) st.current_orientation; shifted_right_shape
   else 
-  if (rightmost_coord (blockref_x st) pixel_list) >= 350 - tilesize then 
+  if (rightmost_coord (blockref_x st) pixel_list) >= startx + boardw - tilesize then 
     let shifted_left_shape = {
       blockref = add_blockref st (-tilesize) 0;
       moving_block = st.moving_block;

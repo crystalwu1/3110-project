@@ -24,13 +24,13 @@ and start_game f lines = let game = f |>  Yojson.Basic.from_file |> parse in
     window, and starts the game engine.*)
 and main () = 
   ANSITerminal.(print_string [red] "\n\nWelcome to OCaml Tetris.\n");
-  print_endline "Please enter the name of the Tetris mode you want to play.\n";
+  ANSITerminal.(print_string [yellow] "Please enter the name of the Tetris mode you want to play.\n\n");
   print_string  "> ";
   let file_name =
     match read_line () with
     | exception End_of_file -> raise InvalidFile
     | read_name -> read_name in
-  print_endline "Please enter the number of lines to win a game.\n";
+  ANSITerminal.(print_string [cyan] "\nPlease enter the number of lines to win a game.\n\n");
   print_string  "> ";
   let lines_to_win =
     match read_line () with
