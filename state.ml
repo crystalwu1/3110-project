@@ -53,7 +53,7 @@ let init_state t =
     won = false;
     dropped = Array.make_matrix 10 20 0;
     animate = Unix.time ();
-    rows_left = 1; 
+    rows_left = 40; 
     (* ^ we can chane this to a user input at some point *)
   }
 let blockref_x st = 
@@ -266,7 +266,7 @@ let rec rightmost_coord acc lst =
 let hold st = 
   erase_block st (blockref_x st) (blockref_y st) st.current_orientation; 
   set_color black;
-  fill_rect 0 480 50 50;
+  fill_rect 0 500 275 275;
   render_block st.moving_block 25 500 (shape_color st.moving_block) st.current_orientation;
   let new_current_shape = {
     blockref = add_blockref st 0 0;
