@@ -14,15 +14,6 @@ let noncanon () =
   Unix.tcsetattr Unix.stdin Unix.TCSANOW newtermio;
   at_exit (fun () -> Unix.tcsetattr Unix.stdin Unix.TCSANOW termio)
 
-let get1char () =
-  let termio = Unix.tcgetattr Unix.stdin in
-  let () =
-    Unix.tcsetattr Unix.stdin Unix.TCSANOW
-      { termio with Unix.c_icanon = false } in
-  let res = input_char Stdlib.stdin in
-  Unix.tcsetattr Unix.stdin Unix.TCSANOW termio;
-  res
-
 let handle_escape st game =
   match input_char Stdlib.stdin with
   (* ESC *)
@@ -37,18 +28,13 @@ let handle_escape st game =
   | _ -> raise NoKeyPress
 
 let keyboard2 game st =
-  let termio = Unix.tcgetattr Unix.stdin in
-  let () =
-    Unix.tcsetattr Unix.stdin Unix.TCSANOW
-      { termio with Unix.c_icanon = false } in
-  Unix.tcsetattr Unix.stdin Unix.TCSANOW termio;
   (match input_char Stdlib.stdin with 
    | '\027' -> handle_escape st game
    | 'd' ->  move "right" st
-   | 'a' | ',' -> move "left" st
-   | 'w' | '\033' -> rotate "clockwise" st game
+   | 'a' -> move "left" st
+   | 'w' -> rotate "clockwise" st game
    | 'x' -> rotate "counterclockwise" st game
-   | 's' | ' ' -> drop st
+   | ' ' -> drop st
    | 'c' -> hold st
    | _ -> raise NoKeyPress)
 
@@ -57,10 +43,10 @@ let keyboard game st =
   if status.keypressed then
     (match read_key () with 
      | 'd' ->  move "right" st
-     | 'a' | ',' -> move "left" st
-     | 'w' | '\033' -> rotate "clockwise" st game
+     | 'a' -> move "left" st
+     | 'w' -> rotate "clockwise" st game
      | 'x' -> rotate "counterclockwise" st game
-     | 's' | ' ' -> begin try drop st with
+     | ' ' -> begin try drop st with
          | GameWon -> raise GameOver end
      | 'c' -> hold st
      | _ -> raise NoKeyPress)

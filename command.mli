@@ -2,7 +2,6 @@ open Graphics
 open Board
 open Game
 open State
-
 open Unix
 
 exception NoKeyPress

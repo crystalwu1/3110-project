@@ -5,7 +5,6 @@ let starty = 100
 let boardw = 300
 let boardh = 600
 let darkgrey = rgb 40 40 40
-let white = rgb 255 255 255 
 let tilesize = boardh / 20
 
 (** [lines_time_q color] writes "Lines Remaining:", "Time:", and 
@@ -24,6 +23,15 @@ let clear_window color =
   set_color color;
   fill_rect 0 0 (size_x ()) (size_y ())
 
+(** [directions ()] renders the directions for the controls of the game. *)
+let directions () = 
+  set_color white;
+  set_text_size 30;
+  moveto 250 50; 
+  draw_string ("Use A and D to move pieces. Use W and X to to rotate.");
+  moveto 250 20; 
+  draw_string ("Press SPACE to drop. Press C to hold.")
+
 (** [grid_helper acc total constx consty dx dy] draws in [total] pairs of 
     grid lines of length [consty] and width [constx], with spacing width [dx] 
     and height [dy].*)
@@ -35,7 +43,6 @@ let rec grid_helper acc total constx consty dx dy=
      rlineto (-constx) (-consty);
      grid_helper (acc+1) total constx consty dx dy)
 
-(** [create_board ()] draws the tetris board and grid.*)
 let create_board () = 
   moveto startx starty;
   set_color darkgrey;
@@ -48,12 +55,10 @@ let create_board () =
   lineto (startx+boardw) starty;
   lineto startx starty
 
-let directions () = 
-  failwith ""
-
 let make_window () = 
   open_graph " 800x800";
   set_window_title "tetris";
   clear_window black;
   create_board ();
+  directions ();
   lines_time_q white
