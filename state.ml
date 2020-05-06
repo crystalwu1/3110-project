@@ -33,10 +33,10 @@ let start = ref (Unix.time ())
     This function will also update the time on the game board. *)
 let time () =
   set_color black;
-  fill_rect 540 680 100 10;  
+  fill_rect 640 680 100 10;  
   set_color white;
   set_text_size 30;
-  moveto 550 680; 
+  moveto 650 680; 
   let time = int_of_float((Unix.time () -. !start)) in
   draw_string (string_of_int time);
   time
@@ -53,7 +53,7 @@ let init_state t =
     won = false;
     dropped = Array.make_matrix 10 20 0;
     animate = Unix.time ();
-    rows_left = 40; 
+    rows_left = 1; 
     (* ^ we can chane this to a user input at some point *)
   }
 let blockref_x st = 
@@ -153,20 +153,20 @@ let erase_block st refx refy orientation =
 (** [erase_lines_remaining st] redraws the window over the rows remaining. *)
 let erase_lines_remaining () = 
   set_color black;
-  fill_rect 610 700 30 100 
+  fill_rect 710 700 30 100 
 
 (** [render_lines_remaining st] draws the rows remaining from [st] into the board.*)
 let render_lines_remaining num =
   erase_lines_remaining ();
   set_color white;
   set_text_size 30;
-  moveto 610 700;
+  moveto 710 700;
   draw_string (string_of_int num);
   num
 
 let erase_q () = 
   set_color black;
-  fill_rect 460 0 200 650
+  fill_rect 560 0 200 650
 
 let rec render_q q dx dy =
   match q with
@@ -177,7 +177,7 @@ let rec render_q q dx dy =
 let pop queue game = 
   match queue with 
   | x::t -> let q = (t@(rand_shape game::[])) in 
-    erase_q () ; render_q q 540 570; (x, q)
+    erase_q () ; render_q q 640 570; (x, q)
   | [] -> raise NoMoreBlocks
 
 (** [find_lowest_y_helper] finds the index of the top most element 
@@ -267,7 +267,7 @@ let hold st =
   erase_block st (blockref_x st) (blockref_y st) st.current_orientation; 
   set_color black;
   fill_rect 0 450 275 275;
-  render_block st.moving_block 25 500 (shape_color st.moving_block) st.current_orientation;
+  render_block st.moving_block 100 500 (shape_color st.moving_block) st.current_orientation;
   let new_current_shape = {
     blockref = add_blockref st 0 0;
     moving_block = st.hold;
@@ -290,11 +290,11 @@ let won st = st.won
 
 let display_win_message time =
   set_color black;
-  fill_rect 0 0 700 800;
+  fill_rect 0 0 800 800;
   set_color white;
-  moveto 190 370;
-  draw_string ("Congratulations! You win! You time is " ^ (string_of_int time) ^ ". Nice job.");
-  moveto 260 350;
+  moveto 240 370;
+  draw_string ("Congratulations! You win! Your time is " ^ (string_of_int time) ^ ". Nice job.");
+  moveto 310 350;
   draw_string ("Press 'y' to play again.")
 
 

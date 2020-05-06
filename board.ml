@@ -1,6 +1,6 @@
 open Graphics
 
-let startx = 125
+let startx = 250
 let starty = 100
 let boardw = 300
 let boardh = 600
@@ -11,12 +11,12 @@ let tilesize = boardh / 20
 (** [lines_time_q color] writes "Lines Remaining:", "Time:", and 
     "Queue:" in [color] .*)
 let lines_time_q color = 
-  moveto 510 700;
+  moveto 610 700;
   set_color color;
   draw_string ("Lines Remaining:");
-  moveto 510 680;
+  moveto 610 680;
   draw_string ("Time:");
-  moveto 510 660;
+  moveto 610 660;
   draw_string ("Queue:")
 
 (** [clear_window color] fills in the background of the window with [color] .*)
@@ -52,7 +52,7 @@ let directions () =
   failwith ""
 
 let make_window () = 
-  open_graph " 700x800";
+  open_graph " 800x800";
   set_window_title "tetris";
   clear_window black;
   create_board ();
