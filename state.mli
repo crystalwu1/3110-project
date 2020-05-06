@@ -6,7 +6,7 @@ exception GameWon
 
 type t 
 
-val init_state : Game.t -> t
+val init_state : Game.t -> int -> t
 
 val blockref_x : t -> int
 

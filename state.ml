@@ -41,7 +41,7 @@ let time () =
   draw_string (string_of_int time);
   time
 
-let init_state t = 
+let init_state t lines = 
   start := (Unix.time ());
   {
     blockref = orig_blockref;
@@ -53,7 +53,7 @@ let init_state t =
     won = false;
     dropped = Array.make_matrix 10 20 0;
     animate = Unix.time ();
-    rows_left = 1; 
+    rows_left = lines; 
     (* ^ we can chane this to a user input at some point *)
   }
 let blockref_x st = 
