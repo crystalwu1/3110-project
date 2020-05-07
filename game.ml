@@ -55,6 +55,12 @@ let parse j =
   try game_of_json j 
   with Type_error (s, _) -> failwith ("Parsing error: " ^ s)
 
+let get_shapes j =
+  j.shapes
+
+let get_shape_name shape = 
+  shape.shape_name
+
 let shape_color shpe = 
   match shpe with 
   | None -> 0

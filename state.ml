@@ -335,8 +335,7 @@ let rec parse_dropped dropped coords curr_col acc=
     let x = coord_x h in 
     let y = coord_y h in 
     let temp_col = curr_col + x in
-    let temp_target = find_lowest_y dropped temp_col in 
-    let temp = (curr_row st) + y - temp_target in
+    let temp = find_lowest_y dropped temp_col in 
     let updated = 
       if temp = (fst acc) 
       then

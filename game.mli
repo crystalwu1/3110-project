@@ -23,6 +23,10 @@ type t
     Raises [Type_error] when [j] is a wrong type of json element] *)
 val parse : Yojson.Basic.t -> t
 
+val get_shapes : t -> shape list
+
+val get_shape_name : shape -> shape_name
+
 val shape_color : shape option -> int
 
 val orientation_name : orientation option -> string
