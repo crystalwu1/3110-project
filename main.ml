@@ -17,7 +17,8 @@ let rec run_game f lines game st =
   | NoKeyPress -> run_game f lines game (update game st)
   | GameOver -> let again = end_keyboard () in if again then start_game f lines else () 
 
-and start_game f lines = let game = f |>  Yojson.Basic.from_file |> parse in 
+and start_game f lines = 
+  let game = f |>  Yojson.Basic.from_file |> parse in 
   run_game f lines game (init_state game lines)
 
 (** [main ()] prompts the user to choose a file of blocks to load, makes the 
@@ -39,8 +40,5 @@ let main () =
   make_window ();
   start_game file_name lines_to_win;
   read_helper ()
-(* make_window ();
-   start_game "tetris.json" 40;
-   read_helper() *)
 
 let () = main ()

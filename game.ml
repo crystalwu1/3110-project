@@ -107,7 +107,9 @@ let max x y =
 let rec shape_height_helper lst min_y max_y =
   match lst with
   | [] -> max_y - min_y + 1
-  | h::t -> let y = coord_y h in shape_height_helper t (min y min_y) (max y max_y)
+  | h::t -> 
+    let y = coord_y h 
+    in shape_height_helper t (min y min_y) (max y max_y)
 
 let shape_height shpe = 
   match (orientation_init shpe) with

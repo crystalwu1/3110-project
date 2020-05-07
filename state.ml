@@ -100,7 +100,8 @@ let rec convert_blk_to_pix_coor st lst acc =
               (((blockref_x st)+((coord_x h)*tilesize),
                 (blockref_y st)+((coord_y h)*tilesize))::acc)
 
-(** [add-blockref st num1 num2] is an [(int * int)] containing the current blockref of [st], but with
+(** [add-blockref st num1 num2] is an [(int * int)] containing the current 
+    blockref of [st], but with
     [num1] added to the first value, and [num2] added to the second.*)
 let add_blockref st num1 num2 =
   match st.blockref with
@@ -121,7 +122,8 @@ let render_block refx refy color orientation =
       else 
         helper t
   in 
-  set_color color; helper (orientation_coordinates orientation)
+  set_color color; 
+  helper (orientation_coordinates orientation)
 
 (** [render_array dropped x y] fills the index in [dropped] with it's color, 
     starting at [x, y].*)
@@ -142,8 +144,10 @@ let rec render_array dropped x y =
     then fill_rect (x*tilesize+startx) (y*tilesize+starty) tilesize tilesize
     else 
     if y=19 
-    then (set_color dropped.(x).(y); fill_rect (x*tilesize+startx) (y*tilesize+starty) tilesize tilesize; render_array dropped (x+1) 0)
-    else (set_color dropped.(x).(y); fill_rect (x*tilesize+startx) (y*tilesize+starty) tilesize tilesize; render_array dropped x (y+1)
+    then (set_color dropped.(x).(y); fill_rect (x*tilesize+startx) 
+            (y*tilesize+starty) tilesize tilesize; render_array dropped (x+1) 0)
+    else (set_color dropped.(x).(y); fill_rect (x*tilesize+startx) 
+            (y*tilesize+starty) tilesize tilesize; render_array dropped x (y+1)
          ))
 
 (** [erase_block refx refy orientation] redraws the background grid at the 
@@ -162,7 +166,8 @@ let erase_block refx refy orientation =
          draw_rect (refx+x*tilesize) (refy+y*tilesize) tilesize tilesize;
          helper t)
       else helper t
-  in set_color darkgrey; helper (orientation_coordinates orientation)
+  in set_color darkgrey; 
+  helper (orientation_coordinates orientation)
 
 
 (** [erase_lines_remaining ()] redraws the window over the Lines Remaining. *)
@@ -230,10 +235,12 @@ let make_val dropped y x value =
     cooridnate is 19. *)
 let rec rem_row dropped y x =
   if y = 19 then 
-    if x = 9 then make_val dropped y x 0
+    if x = 9 
+    then make_val dropped y x 0
     else let dr = make_val dropped y x 0 in rem_row dr y (x+1)
   else 
-  if x = 9 then let dr2 = make_val dropped y x dropped.(x).(y+1) in
+  if x = 9 
+  then let dr2 = make_val dropped y x dropped.(x).(y+1) in
     rem_row dr2 (y+1) 0
   else let dr3 = make_val dropped y x dropped.(x).(y+1) in 
     rem_row dr3 y (x+1)
@@ -306,14 +313,16 @@ let display_win_message time =
   fill_rect 0 0 800 800;
   set_color white;
   moveto 240 370;
-  draw_string ("Congratulations! You win! Your time is " ^ (string_of_int time) ^ ". Nice job.");
+  draw_string 
+    ("Congratulations! You win! Your time is " ^ (string_of_int time) ^ ". Nice job.");
   moveto 310 350;
   draw_string ("Press 'y' to play again.")
 
 let win time rows_left = 
   if rows_left > 0
   then rows_left
-  else (display_win_message time; rows_left)
+  else (display_win_message time; 
+        rows_left)
 
 (** [parse_dropped dropped coords curr_col acc] is the tuple containing the
     (y-value of the highest cell in [array] within the width of a block with 
@@ -366,7 +375,8 @@ let drop st =
   let color = shape_color st.moving_block in
   let coords = orientation_coordinates st.current_orientation in
   let curr_col = curr_col st in 
-  let (target_cell, y_target_coord) = parse_dropped st.dropped coords curr_col (-4, -4) in
+  let (target_cell, y_target_coord) = 
+    parse_dropped st.dropped coords curr_col (-4, -4) in
   add_to_dropped st.dropped color coords (target_cell+1) y_target_coord curr_col;
   erase_block (blockref_x st) (blockref_y st) st.current_orientation;
   render_array st.dropped 0 0;
@@ -385,7 +395,9 @@ let drop st =
     } in
   let final_res = row_remove new_st in
   update_after_row_rem final_res.dropped 0 0;
-  if (win final_res.time final_res.rows_left) > 0 then final_res else raise GameWon
+  if (win final_res.time final_res.rows_left) > 0 
+  then final_res 
+  else raise GameWon
 
 let rotate string st game = 
   let new_shape = {
@@ -401,7 +413,8 @@ let rotate string st game =
     current_orientation = 
       next_orientation string game st.moving_block st.current_orientation
   } in 
-  let pixel_list = convert_blk_to_pix_coor st (orientation_coordinates new_shape.current_orientation) [] in 
+  let pixel_list = convert_blk_to_pix_coor st 
+      (orientation_coordinates new_shape.current_orientation) [] in 
   if (leftmost_coord (blockref_x st) pixel_list) <= startx then  
     let shifted_right_shape = {
       blockref = add_blockref st tilesize 0;
@@ -415,7 +428,8 @@ let rotate string st game =
       rows_left = st.rows_left;
       current_orientation = 
         next_orientation string game st.moving_block st.current_orientation } 
-    in erase_block (blockref_x st) (blockref_y st) st.current_orientation; shifted_right_shape
+    in erase_block (blockref_x st) (blockref_y st) st.current_orientation; 
+    shifted_right_shape
   else 
   if (rightmost_coord (blockref_x st) pixel_list) >= startx + boardw - tilesize then 
     let shifted_left_shape = {
@@ -430,7 +444,8 @@ let rotate string st game =
       rows_left = st.rows_left;
       current_orientation = 
         next_orientation string game st.moving_block st.current_orientation } 
-    in erase_block (blockref_x st) (blockref_y st) st.current_orientation; shifted_left_shape
+    in erase_block (blockref_x st) (blockref_y st) st.current_orientation; 
+    shifted_left_shape
   else  let new_shape = {
       blockref = add_blockref st 0 0;
       moving_block = st.moving_block;
@@ -443,18 +458,22 @@ let rotate string st game =
       rows_left = st.rows_left;
       current_orientation = 
         next_orientation string game st.moving_block st.current_orientation
-    } in erase_block (blockref_x st) (blockref_y st) st.current_orientation; new_shape
+    } in erase_block (blockref_x st) (blockref_y st) st.current_orientation; 
+    new_shape
 
 
 let move direction st =
-  let  pixel_list = convert_blk_to_pix_coor st (orientation_coordinates st.current_orientation) [] in 
+  let  pixel_list = 
+    convert_blk_to_pix_coor st (orientation_coordinates st.current_orientation) [] in 
   if ((leftmost_coord (blockref_x st) (pixel_list)) <= startx 
       && direction = "left") then st
   else 
   if (rightmost_coord (blockref_x st) (pixel_list)) >= (startx+boardw) - tilesize  
-  && direction = "right" then st 
+  && direction = "right" 
+  then st 
   else 
-  if direction = "right" then 
+  if direction = "right" 
+  then 
     let new_shape = {
       blockref = add_blockref st tilesize 0;
       moving_block = st.moving_block;
@@ -479,7 +498,8 @@ let move direction st =
       won = st.won;
       dropped = st.dropped;
       animate = st.animate;
-      rows_left = st.rows_left } in erase_block (blockref_x st) (blockref_y st) st.current_orientation; new_shape
+      rows_left = st.rows_left } in 
+    erase_block (blockref_x st) (blockref_y st) st.current_orientation; new_shape
 
 let update game st = 
   let final_res = row_remove st in
@@ -501,7 +521,9 @@ let update game st =
       }
     else (
       {
-        blockref = if (Unix.time ()) -. st.animate = 1. then add_blockref st 0 (-tilesize) else st.blockref;
+        blockref = if (Unix.time ()) -. st.animate = 1. 
+          then add_blockref st 0 (-tilesize) 
+          else st.blockref;
         moving_block = st.moving_block;
         hold = st.hold;
         current_orientation = st.current_orientation;
@@ -510,16 +532,21 @@ let update game st =
         won = (if st.rows_left = 0 then true else false);
         dropped = st.dropped;
         (* animate = if st.animate mod 100 = 0 then 1 else st.animate +1; *)
-        animate = if (Unix.time ()) -. st.animate = 1. then (Unix.time ()) else st.animate;
+        animate = if (Unix.time ()) -. st.animate = 1. 
+          then (Unix.time ()) 
+          else st.animate;
         rows_left = render_lines_remaining final_res.rows_left;
       }) in 
   let coords = orientation_coordinates st.current_orientation in
   let curr_col = curr_col st in 
   let (target_cell, y_target_coord) = parse_dropped st.dropped coords curr_col (-4, -4) in
   if (curr_row st) - 1 + y_target_coord <= target_cell then drop result else
-    (if (Unix.time ()) -. st.animate = 1. then erase_block (blockref_x st) (blockref_y st) st.current_orientation;
-     render_block (blockref_x st) (coord_to_pix "y" (target_cell + 1 - y_target_coord)) (darkgrey) st.current_orientation;
-     render_block (blockref_x result) (blockref_y result) (shape_color st.moving_block) st.current_orientation; 
+    (if (Unix.time ()) -. st.animate = 1. 
+     then erase_block (blockref_x st) (blockref_y st) st.current_orientation;
+     render_block (blockref_x st) (coord_to_pix "y" (target_cell + 1 - y_target_coord)) 
+       (darkgrey) st.current_orientation;
+     render_block (blockref_x result) (blockref_y result)
+       (shape_color st.moving_block) st.current_orientation; 
      create_board ();
      result)
 
