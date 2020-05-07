@@ -328,26 +328,28 @@ let win time rows_left =
     (y-value of the highest cell in [array] within the width of a block with 
     render point [curr_col] and coordinates [coords], y-coordinate of that 
     block) *)
-let rec parse_dropped dropped coords curr_col acc= 
-  match coords with 
-  | [] -> acc
-  | h::t -> 
-    let x = coord_x h in 
-    let y = coord_y h in 
-    let temp_col = curr_col + x in
-    let temp_target = find_lowest_y dropped temp_col in 
-    let temp = (curr_row st) + y - temp_target in
-    let updated = 
-      if temp = (fst acc) 
-      then
-        if y > (snd acc)
-        then acc 
-        else (temp, y)
-      else 
-      if temp > (fst acc)
-      then (temp, y) 
-      else acc in 
-    parse_dropped dropped t curr_col updated
+let parse_dropped st dropped coords curr_col=
+  let rec helper dropped doords acc=  
+    match doords with 
+    | [] -> acc
+    | h::t -> 
+      let x = coord_x h in 
+      let y = coord_y h in 
+      let temp_col = curr_col + x in
+      let temp = find_lowest_y dropped temp_col in 
+      let diff = (curr_row st) + y - 1 -(temp + 1) in
+      let updated = 
+        if diff = (fst acc) 
+        then
+          if y > (snd (snd acc))
+          then acc 
+          else (diff, (temp, y))
+        else 
+        if diff < (fst acc)
+        then (diff, (temp, y)) 
+        else acc in 
+      helper dropped t updated
+  in print_endline (string_of_int (fst(helper dropped coords (20, (-4, -4) )))); snd (helper dropped coords (20, (-4, -4)))
 
 (** [add_to_dropped dropped color coords target_cell y_target_coord curr_col]
     fills in the blocks corresponding to the coordinates in [coords] with color [color].
@@ -377,7 +379,7 @@ let drop st =
   let coords = orientation_coordinates st.current_orientation in
   let curr_col = curr_col st in 
   let (target_cell, y_target_coord) = 
-    parse_dropped st.dropped coords curr_col (-4, -4) in
+    parse_dropped st st.dropped coords curr_col in
   add_to_dropped st.dropped color coords (target_cell+1) y_target_coord curr_col;
   erase_block (blockref_x st) (blockref_y st) st.current_orientation;
   render_array st.dropped 0 0;
@@ -539,7 +541,7 @@ let update game st =
       }) in 
   let coords = orientation_coordinates st.current_orientation in
   let curr_col = curr_col st in 
-  let (target_cell, y_target_coord) = parse_dropped st.dropped coords curr_col (-4, -4) in
+  let (target_cell, y_target_coord) = parse_dropped st st.dropped coords curr_col in
   if (curr_row st) - 1 + y_target_coord <= target_cell then drop result else
     (if (Unix.time ()) -. st.animate = 1. 
      then erase_block (blockref_x st) (blockref_y st) st.current_orientation;
