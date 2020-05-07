@@ -19,7 +19,7 @@ type shape_name = string
 (** abstract type of values representing a tetris game. *)
 type t
 
-(** [parse j] is a record of a tetirs game from [j]
+(** [parse j] is a record of a tetris game from [j]
     Raises [Type_error] when [j] is a wrong type of json element] *)
 val parse : Yojson.Basic.t -> t
 

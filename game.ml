@@ -150,5 +150,6 @@ let rec next_orientation direction game shape curr_orientation =
   | None -> failwith "no shape yet"
   | Some s -> match curr_orientation with
     | None -> failwith "no orientaiton yet"
-    | Some o -> Some (next_shape direction 
-                        (get_shape game s.shape_name).orientations o.orient_name)
+    | Some o -> 
+      Some (next_shape direction 
+              (get_shape game s.shape_name).orientations o.orient_name)

@@ -335,7 +335,8 @@ let rec parse_dropped dropped coords curr_col acc=
     let x = coord_x h in 
     let y = coord_y h in 
     let temp_col = curr_col + x in
-    let temp = find_lowest_y dropped temp_col in 
+    let temp_target = find_lowest_y dropped temp_col in 
+    let temp = (curr_row st) + y - temp_target in
     let updated = 
       if temp = (fst acc) 
       then
@@ -531,7 +532,6 @@ let update game st =
         queue = st.queue;
         won = (if st.rows_left = 0 then true else false);
         dropped = st.dropped;
-        (* animate = if st.animate mod 100 = 0 then 1 else st.animate +1; *)
         animate = if (Unix.time ()) -. st.animate = 1. 
           then (Unix.time ()) 
           else st.animate;
