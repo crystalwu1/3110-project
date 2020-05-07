@@ -349,7 +349,7 @@ let parse_dropped st dropped coords curr_col=
         then (diff, (temp, y)) 
         else acc in 
       helper dropped t updated
-  in print_endline (string_of_int (fst(helper dropped coords (20, (-4, -4) )))); snd (helper dropped coords (20, (-4, -4)))
+  in snd (helper dropped coords (20, (-4, -4)))
 
 (** [add_to_dropped dropped color coords target_cell y_target_coord curr_col]
     fills in the blocks corresponding to the coordinates in [coords] with color [color].
@@ -562,9 +562,9 @@ let soft_drop st =
     queue = st.queue;
     won = st.won;
     dropped = st.dropped;
-    animate = 0;
+    animate = 0.;
     rows_left = st.rows_left;
-  })
+  }
 
 
 

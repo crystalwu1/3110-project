@@ -25,24 +25,55 @@ let fst_x = coord_x fst_coor
 let fst_y = coord_y fst_coor
 let init_orient = orientation_init first_shape
 let height = shape_height first_shape
-let next_orientation = 
+let next_orientatio = 
   next_orientation "clockwise" j (Some first_shape) (Some fst_ori)
 let expected_next_orientation = Some (head_of shp_oris true)
 
+let pj = Yojson.Basic.from_file "pentris.json" |> parse
+let pshapes = get_shapes pj
+let pfirst_shape = head_of pshapes false
+let pshp_name = get_shape_name pfirst_shape
+let pshp_color = shape_color (Some pfirst_shape)
+let pshp_oris = shape_orientations (Some pfirst_shape)
+let pfst_ori = head_of pshp_oris false
+let pfst_oname = orientation_name (Some pfst_ori)
+let pcoors = orientation_coordinates (Some pfst_ori)
+let pfst_coor = head_of pcoors false
+let pfst_x = coord_x pfst_coor
+let pfst_y = coord_y pfst_coor
+let pinit_orient = orientation_init pfirst_shape
+let pheight = shape_height pfirst_shape
+let pnext_orientatio = 
+  next_orientation "clockwise" pj (Some pfirst_shape) (Some pfst_ori)
+let pexpected_next_orientation = Some (head_of pshp_oris true)
+
 
 let game_tests = [
-  "check color of first shape" >:: 
+  "check color of first shape in tetris" >:: 
   (fun _ -> assert_equal (int_of_string("0x0F9AD7")) shp_color);
-  "check name of first shape" >:: (fun _ -> assert_equal "long" shp_name);
-  "check name of first shape's first orientation name" >:: 
+  "check name of first shape in tetris" >:: (fun _ -> assert_equal "long" shp_name);
+  "check name of first shape's first orientation name in tetris" >:: 
   (fun _ -> assert_equal "orientation1" fst_oname);
-  "check first x coordinate" >:: (fun _ -> assert_equal (-2) fst_x);
-  "check first y coordinate" >:: (fun _ -> assert_equal 1 fst_y);
-  "check orientation initialization" >:: 
+  "check first x coordinate in tetris" >:: (fun _ -> assert_equal (-2) fst_x);
+  "check first y coordinate in tetris" >:: (fun _ -> assert_equal 1 fst_y);
+  "check orientation initialization in tetris" >:: 
   (fun _ -> assert_equal init_orient (Some fst_ori));
-  "check shape height" >:: (fun _ -> assert_equal height 1);
-  "check next orientation" >:: 
-  (fun _ -> assert_equal next_orientation expected_next_orientation);
+  "check shape height in tetris" >:: (fun _ -> assert_equal height 1);
+  "check next orientation in tetris" >:: 
+  (fun _ -> assert_equal next_orientatio expected_next_orientation);
+  "check color of first shape in pentris" >:: 
+  (fun _ -> assert_equal (int_of_string("0x0F9AD7")) pshp_color);
+  "check name of first shape in pentris" >:: 
+  (fun _ -> assert_equal "long" pshp_name);
+  "check name of first shape's first orientation name in pentris" >:: 
+  (fun _ -> assert_equal "left" pfst_oname);
+  "check first x coordinate in pentris" >:: (fun _ -> assert_equal 0 pfst_x);
+  "check first y coordinate in pentris" >:: (fun _ -> assert_equal 2 pfst_y);
+  "check orientation initialization in pentris" >:: 
+  (fun _ -> assert_equal pinit_orient (Some pfst_ori));
+  "check shape height in pentris" >:: (fun _ -> assert_equal pheight 5);
+  "check next orientation in pentris" >:: 
+  (fun _ -> assert_equal pnext_orientatio pexpected_next_orientation);
 ]
 
 let command_tests = [

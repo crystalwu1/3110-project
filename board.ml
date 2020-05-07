@@ -28,9 +28,9 @@ let directions () =
   set_color white;
   set_text_size 30;
   moveto 250 50; 
-  draw_string ("Use A and D to move pieces. Use W and X to to rotate.");
+  draw_string ("Use A and D to move left and right. Use W and X to to rotate.");
   moveto 250 20; 
-  draw_string ("Press SPACE to drop. Press C to hold.")
+  draw_string ("Press SPACE to drop and S to soft-drop. Press C to hold.")
 
 (** [grid_helper acc total constx consty dx dy] draws in [total] pairs of 
     grid lines of length [consty] and width [constx], with spacing width [dx] 

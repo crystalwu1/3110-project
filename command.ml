@@ -9,7 +9,8 @@ exception GameOver
 
 let noncanon () =
   let termio = Unix.tcgetattr Unix.stdin in
-  let newtermio = {termio with c_icanon = false; c_vmin = 1; c_vtime = 0; c_echo = false}
+  let newtermio = 
+    {termio with c_icanon = false; c_vmin = 1; c_vtime = 0; c_echo = false}
   in
   Unix.tcsetattr Unix.stdin Unix.TCSANOW newtermio;
   at_exit (fun () -> Unix.tcsetattr Unix.stdin Unix.TCSANOW termio)
@@ -50,6 +51,8 @@ let keyboard game st =
      | ' ' -> begin try drop st with
          | GameWon -> raise GameOver end
      | 'c' -> hold st
+     | 's' -> begin try soft_drop st with
+         | GameWon -> raise GameOver end
      | _ -> raise NoKeyPress)
   else raise NoKeyPress
 
