@@ -27,9 +27,9 @@ let clear_window color =
 let directions () = 
   set_color white;
   set_text_size 30;
-  moveto 250 50; 
+  moveto 150 50; 
   draw_string ("Use A and D to move left and right. Use W and X to to rotate.");
-  moveto 250 20; 
+  moveto 150 20; 
   draw_string ("Press SPACE to drop and S to soft-drop. Press C to hold.")
 
 (** [grid_helper acc total constx consty dx dy] draws in [total] pairs of 
