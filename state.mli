@@ -36,3 +36,5 @@ val drop : t -> t
     removed *)
 val row_remove : t -> t
 
+val soft_drop : t -> t
+

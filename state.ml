@@ -552,6 +552,20 @@ let update game st =
      create_board ();
      result)
 
+let soft_drop st = 
+  {
+    blockref = add_blockref st 0 (-tilesize) ;
+    moving_block = st.moving_block;
+    hold = st.hold;
+    current_orientation = st.current_orientation;
+    time = time ();
+    queue = st.queue;
+    won = st.won;
+    dropped = st.dropped;
+    animate = 0;
+    rows_left = st.rows_left;
+  })
+
 
 
 

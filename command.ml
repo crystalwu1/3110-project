@@ -35,6 +35,7 @@ let keyboard2 game st =
    | 'w' -> rotate "clockwise" st game
    | 'x' -> rotate "counterclockwise" st game
    | ' ' -> drop st
+   | 's' -> soft_drop st
    | 'c' -> hold st
    | _ -> raise NoKeyPress)
 
