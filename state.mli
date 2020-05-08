@@ -13,13 +13,16 @@ exception GameWon
 (** The abstract type of values representing the game state. *)
 type t 
 
+(** [init_state t lines] is the initial state of the game [t] where 
+    [lines] is the numbers of lines needed to win  *)
 val init_state : Game.t -> int -> t
 
 (** [won st] is [true] when the game has been won, otherwise [false].*)
 val won : t -> bool
 
 (** [update game st] is [st] altered to handle the animation of the block 
-    moving down, removing filled rows, and creating the shadow of the block.*)
+    moving down, removing filled rows, and creating the shadow of the block
+    given the information in [game] *)
 val update : Game.t -> t -> t
 
 val hold : t -> t
@@ -32,8 +35,7 @@ val move : string -> t -> t
     array of dropped blocks.*)
 val drop : t -> t
 
-(** [row_remove st] is the updated state of [st] with the full rows
-    removed *)
+(** [row_remove st] is the updated state of [st] with the full rows removed *)
 val row_remove : t -> t
 
 val soft_drop : t -> t

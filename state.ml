@@ -23,7 +23,8 @@ type t = {
 
 let won st = st.won  
 
-(** [init_q length acc t] initializes a [Game.shape list] of random shapes. *)
+(** [init_q length acc t] initializes a [Game.shape list] of random shapes 
+    of length [length] including the list [acc] given game information in [t] *)
 let rec init_q length acc t = 
   match length with 
   | n when n = 0 -> acc
@@ -61,25 +62,25 @@ let init_state t lines =
     (* ^ we can chane this to a user input at some point *)
   }
 
-(** [blockref_x st] is the x-coordinate of the render point of the currently
-    ,moving block in [st]. *)
+(** [blockref_x st] is the x-coordinate of the render point of the currently,
+    moving block in [st]. *)
 let blockref_x st = 
   match st.blockref with
   | (x, _) -> x
 
-(** [blockref_x st] is the y-coordinate of the render point of the currently
+(** [blockref_y st] is the y-coordinate of the render point of the currently
     moving block in [st]. *)
 let blockref_y st = 
   match st.blockref with
   | (_, y) -> y
 
-(** [curr_row st] is the location of the render point of [st]'s currently moving
-    block in the 10x20 array.*)
+(** [curr_row st] is the row location of the render point of [st]'s 
+    currently moving block in the 10x20 array.*)
 let curr_row st =
   (blockref_y st - starty) / tilesize
 
-(** [curr_col st] is the location of the render point of [st]'s currently moving
-    block in the 10x20 array.*)
+(** [curr_col st] is the cloumn location of the render point of [st]'s 
+    currently moving block in the 10x20 array.*)
 let curr_col st = 
   let pixels = (blockref_x st)- startx in (pixels/tilesize)
 
@@ -101,8 +102,8 @@ let rec convert_blk_to_pix_coor st lst acc =
                 (blockref_y st)+((coord_y h)*tilesize))::acc)
 
 (** [add-blockref st num1 num2] is an [(int * int)] containing the current 
-    blockref of [st], but with
-    [num1] added to the first value, and [num2] added to the second.*)
+    blockref of [st], but with [num1] added to the first value, and [num2] 
+    added to the second.*)
 let add_blockref st num1 num2 =
   match st.blockref with
   | (x, y) -> (x+num1, y+num2)
@@ -185,16 +186,22 @@ let render_lines_remaining num =
   draw_string (string_of_int num);
   num
 
+(** [erase_q ()] draws a black box over the tile queue before it is redrawn *)
 let erase_q () = 
   set_color black;
   fill_rect 560 0 200 650
 
+(** [render_q q dx dy] draws a tile queue of the shapes in [q] at 
+    position [(dx, dy)] *)
 let rec render_q q dx dy =
   match q with
   | [] -> ()
   | h::t -> render_block dx dy (shape_color (Some h)) (orientation_init h); 
     render_q t dx (dy-(tilesize*(1+(shape_height h))))
 
+(** [pop queue game] is tuple of the a tile and a queue. It also will 
+    erase the current queue, draw [queue], and raise [NoMoreBlocks] if [queue]
+    is empty *)
 let pop queue game = 
   match queue with 
   | x::t -> let q = (t@(rand_shape game::[])) in 
@@ -202,7 +209,7 @@ let pop queue game =
   | [] -> raise NoMoreBlocks
 
 (** [find_lowest_y dropped column] finds the highest cell that is filled in 
-    column [column] of array [dropped]*)
+    with part of a tile at column [column] of array [dropped]*)
 let find_lowest_y dropped column =
   let rec find_lowest_y_helper column idx = 
     if idx < 0 then -1 else 
@@ -211,19 +218,20 @@ let find_lowest_y dropped column =
       | _ -> find_lowest_y_helper column (idx-1) in
   find_lowest_y_helper dropped.(column) 19
 
-(** [add_coordinate dropped x y color] set coordinate ([x],[y]) to [color] *)
+(** [add_coordinate dropped x y color] set coordinate ([x],[y]) to [color] 
+    in the array [dropped] *)
 let add_coordinate dropped x y color = 
   dropped.(x).(y) <- color
 
-(** [can_remove dropped y x] is true if there is no 0 valued 
-    element in row [y] starting at position [x] and false otherwise *)
+(** [can_remove dropped y x] is [true] if there is no 0 valued element in row 
+    [y] starting at position [x] in the array [dropped] and [false] otherwise *)
 let rec can_remove dropped y x =
   if dropped.(x).(y) > 0 then 
     if x = 9 then (true, dropped)
     else can_remove dropped y (x+1)
   else (false, dropped)
 
-(** [make_val dropped y x valu] sets the element at position 
+(** [make_val dropped y x value] sets the element at position 
     ([x], [y]) in the array [dropped] to [value] *)
 let make_val dropped y x value = 
   dropped.(x).(y) <- value;
@@ -308,6 +316,9 @@ let hold st =
     new_current_shape.current_orientation;
   new_current_shape
 
+(** [display_win_message time] with erase the game board and display a
+    winning message including [time], the game time to finish the game, in 
+    addition to giving the user the option to intialize a new game *)
 let display_win_message time =
   set_color black;
   fill_rect 0 0 800 800;
@@ -318,17 +329,19 @@ let display_win_message time =
   moveto 310 350;
   draw_string ("Press 'y' to play again.")
 
+(** [win time rows_left] is [rows_left], but if there are no rows left,
+    the winning message display function is called with parameter [time] *)
 let win time rows_left = 
   if rows_left > 0
   then rows_left
   else (display_win_message time; 
         rows_left)
 
-(** [parse_dropped dropped coords curr_col acc] is the tuple containing the
-    (y-value of the highest cell in [array] within the width of a block with 
-    render point [curr_col] and coordinates [coords], y-coordinate of that 
-    block) *)
-let parse_dropped st dropped coords curr_col=
+(** [parse_dropped st dropped coords curr_col] is the tuple containing the
+    y-value of the highest cell in [dropped] within the width of a block with 
+    render point [curr_col] and coordinates [coords] and y-coordinate of that 
+    block all given the current state of the game [st] *)
+let parse_dropped st dropped coords curr_col =
   let rec helper dropped doords acc=  
     match doords with 
     | [] -> acc
@@ -352,12 +365,12 @@ let parse_dropped st dropped coords curr_col=
   in snd (helper dropped coords (20, (-4, -4)))
 
 (** [add_to_dropped dropped color coords target_cell y_target_coord curr_col]
-    fills in the blocks corresponding to the coordinates in [coords] with color [color].
-    [target_cell], [y_target_coord], and [curr_col] are measures to help calculate 
-    proper block placement, representing the y-value of the highest cell in [dropped] 
-    within the width of a block with x-value render point [curr_col] and 
-    coordinates [coords], y-coordinate of that block, and x-value of the render
-    point, respectively.*)
+    fills in the blocks corresponding to the coordinates in [coords] with color 
+    [color]. [target_cell], [y_target_coord], and [curr_col] are measures to 
+    help calculate proper block placement, representing the y-value of the 
+    highest cell in [dropped] within the width of a block with x-value render 
+    point [curr_col] and coordinates [coords], y-coordinate of that block, 
+    and x-value of the render point, respectively.*)
 let rec add_to_dropped dropped color coords target_cell y_target_coord curr_col= 
   match coords with 
   | [] -> ()
@@ -367,6 +380,9 @@ let rec add_to_dropped dropped color coords target_cell y_target_coord curr_col=
     add_coordinate dropped (curr_col+x) (target_cell-y_target_coord+y) color;
     add_to_dropped dropped color t target_cell y_target_coord curr_col
 
+(** [update_after_row_rem drop x y] will use the colors in [drop] to 
+    draw a block at ([x], [y]) for the all coordinates above and to the right 
+    of ([x], [y]) *)
 let rec update_after_row_rem drop x y  = 
   set_color drop.(x).(y);
   fill_rect (x*tilesize+startx) (y*tilesize+starty) tilesize tilesize;

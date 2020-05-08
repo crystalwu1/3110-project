@@ -12,15 +12,15 @@ val boardw : int
 (** The height of the Tetris board. *)
 val boardh : int
 
-(** The size of the sub-block that create Tetris pieces. *)
-val tilesize : int
-
 (** The color of the grid lines and the moving block shadow. *)
 val darkgrey : int
+
+(** The size of the sub-block that create Tetris pieces. *)
+val tilesize : int
 
 (** [create_board ()] draws the tetris board and grid. *)
 val create_board : unit -> unit
 
 (** [make_window ()] creates the Graphics window, renders the board and 
-    directions, and sets up the Lines Remaining, Time, and Queue markers..*)
+    directions, and sets up the Lines Remaining, Time, and Queue markers. *)
 val make_window : unit -> unit

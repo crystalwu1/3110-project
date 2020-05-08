@@ -32,9 +32,9 @@ let directions () =
   moveto 150 20; 
   draw_string ("Press SPACE to drop and S to soft-drop. Press C to hold.")
 
-(** [grid_helper acc total constx consty dx dy] draws in [total] pairs of 
-    grid lines of length [consty] and width [constx], with spacing width [dx] 
-    and height [dy].*)
+(** [grid_helper acc total constx consty dx dy] draws in grid lines of 
+    length [consty] and width [constx], with spacing width [dx] and height 
+    [dy] with a counter [acc] to indicate when [total] pairs have been drawn.*)
 let rec grid_helper acc total constx consty dx dy=
   if acc = total then (moveto startx starty) else
     (rmoveto dx dy;

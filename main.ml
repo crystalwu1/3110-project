@@ -13,9 +13,11 @@ let rec read_helper () =
   | _ -> ()
 
 let rec run_game f lines game st = 
-  try let x = keyboard game st in x |> update game |> run_game f lines game with 
+  try let x = keyboard game st in 
+    x |> update game |> run_game f lines game with 
   | NoKeyPress -> run_game f lines game (update game st)
-  | GameOver -> let again = end_keyboard () in if again then start_game f lines else () 
+  | GameOver -> let again = end_keyboard () in if again 
+    then start_game f lines else () 
 
 and start_game f lines = 
   let game = f |>  Yojson.Basic.from_file |> parse in 
@@ -25,13 +27,15 @@ and start_game f lines =
     window, and starts the game engine.*)
 let main () = 
   ANSITerminal.(print_string [red] "\n\nWelcome to OCaml Tetris.\n");
-  ANSITerminal.(print_string [yellow] "Please enter the name of the Tetris mode you want to play.\n\n");
+  ANSITerminal.(print_string [yellow] 
+                  "Please enter the name of the Tetris mode you want to play.\n\n");
   print_string  "> ";
   let file_name =
     match read_line () with
     | exception End_of_file -> raise InvalidFile
     | read_name -> read_name in
-  ANSITerminal.(print_string [cyan] "\nPlease enter the number of lines to win a game.\n\n");
+  ANSITerminal.(print_string [cyan] 
+                  "\nPlease enter the number of lines to win a game.\n\n");
   print_string  "> ";
   let lines_to_win =
     match read_line () with
