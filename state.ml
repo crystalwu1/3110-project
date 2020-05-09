@@ -23,6 +23,18 @@ type t = {
 
 let won st = st.won  
 
+let moving_block st = st.moving_block
+
+let hold st = st.hold
+
+let current_orientation st = st.current_orientation
+
+let time_st st = st.time
+
+let queue st = st.queue
+
+let rows_left st = st.rows_left
+
 (** [init_q length acc t] initializes a [Game.shape list] of random shapes 
     of length [length] including the list [acc] given game information in [t] *)
 let rec init_q length acc t = 
@@ -34,9 +46,9 @@ let rec init_q length acc t =
 let start = 
   ref (Unix.time ())
 
-(** [time ()] is the amount of time in seconds since the game has started. 
+(** [time st] is the amount of time in seconds since the game has started. 
     This function will also update the time on the game board. *)
-let time () =
+let time st =
   set_color black;
   fill_rect 640 680 100 10;  
   set_color white;
@@ -53,23 +65,18 @@ let init_state t lines =
     moving_block = None;
     hold = None;
     current_orientation = None;
-    time = time ();
+    time = int_of_float(!start);
     queue = init_q 5 [] t;
     won = false;
     dropped = Array.make_matrix 10 20 0;
     animate = Unix.time ();
     rows_left = lines; 
-    (* ^ we can chane this to a user input at some point *)
   }
 
-(** [blockref_x st] is the x-coordinate of the render point of the currently,
-    moving block in [st]. *)
 let blockref_x st = 
   match st.blockref with
   | (x, _) -> x
 
-(** [blockref_y st] is the y-coordinate of the render point of the currently
-    moving block in [st]. *)
 let blockref_y st = 
   match st.blockref with
   | (_, y) -> y
@@ -313,8 +320,7 @@ let hold st =
       | None -> None}  in 
   render_block (blockref_x new_current_shape) (blockref_y new_current_shape) 
     (shape_color new_current_shape.moving_block) 
-    new_current_shape.current_orientation;
-  new_current_shape
+    new_current_shape.current_orientation; new_current_shape
 
 (** [display_win_message time] with erase the game board and display a
     winning message including [time], the game time to finish the game, in 
@@ -354,15 +360,10 @@ let parse_dropped st dropped coords curr_col =
       let updated = 
         if diff = (fst acc) 
         then
-          if y > (snd (snd acc))
-          then acc 
-          else (diff, (temp, y))
+          if y > (snd (snd acc)) then acc else (diff, (temp, y))
         else 
-        if diff < (fst acc)
-        then (diff, (temp, y)) 
-        else acc in 
-      helper dropped t updated
-  in snd (helper dropped coords (20, (-4, -4)))
+        if diff < (fst acc) then (diff, (temp, y)) else acc in 
+      helper dropped t updated in snd (helper dropped coords (20, (-4, -4)))
 
 (** [add_to_dropped dropped color coords target_cell y_target_coord curr_col]
     fills in the blocks corresponding to the coordinates in [coords] with color 
@@ -390,6 +391,22 @@ let rec update_after_row_rem drop x y  =
     if y > 18 then () else update_after_row_rem drop 0 (y+1)
   else update_after_row_rem drop (x+1) y
 
+(** [new_st st] is a state of type [t] that removes the moving block and resets
+    its render point to the original value. *)
+let new_st st= 
+  {
+    blockref = orig_blockref;
+    moving_block = None;
+    hold = st.hold;
+    current_orientation = None;
+    time = st.time;
+    queue = st.queue;
+    won = st.won;
+    dropped= st.dropped;
+    animate = st.animate;
+    rows_left = render_lines_remaining st.rows_left;
+  }
+
 let drop st = 
   let color = shape_color st.moving_block in
   let coords = orientation_coordinates st.current_orientation in
@@ -399,20 +416,7 @@ let drop st =
   add_to_dropped st.dropped color coords (target_cell+1) y_target_coord curr_col;
   erase_block (blockref_x st) (blockref_y st) st.current_orientation;
   render_array st.dropped 0 0;
-  let new_st = 
-    {
-      blockref = orig_blockref;
-      moving_block = None;
-      hold = st.hold;
-      current_orientation = None;
-      time = st.time;
-      queue = st.queue;
-      won = st.won;
-      dropped= st.dropped;
-      animate = st.animate;
-      rows_left = render_lines_remaining st.rows_left;
-    } in
-  let final_res = row_remove new_st in
+  let final_res = row_remove (new_st st) in
   update_after_row_rem final_res.dropped 0 0;
   if (win final_res.time final_res.rows_left) > 0 
   then final_res 
@@ -482,19 +486,16 @@ let rotate string st game =
 
 
 let move direction st =
-  let  pixel_list = 
+  let pixel_list = 
     convert_blk_to_pix_coor st (orientation_coordinates st.current_orientation) [] in 
   if ((leftmost_coord (blockref_x st) (pixel_list)) <= startx 
       && direction = "left") then st
-  else 
-  if (rightmost_coord (blockref_x st) (pixel_list)) >= (startx+boardw) - tilesize  
-  && direction = "right" 
-  then st 
-  else 
-  if direction = "right" 
-  then 
+  else if (rightmost_coord (blockref_x st) (pixel_list)) >= (startx+boardw) - tilesize  
+       && direction = "right" 
+  then st else 
     let new_shape = {
-      blockref = add_blockref st tilesize 0;
+      blockref = add_blockref st (if direction = "right" then 
+                                    tilesize else (-tilesize)) 0;
       moving_block = st.moving_block;
       hold = st.hold;
       current_orientation = st.current_orientation;
@@ -504,57 +505,51 @@ let move direction st =
       dropped= st.dropped;
       animate = st.animate;
       rows_left = st.rows_left } in 
-    erase_block (blockref_x st) (blockref_y st) st.current_orientation; 
-    new_shape
-  else  
-    let new_shape = {
-      blockref = add_blockref st (-tilesize) 0;
-      moving_block = st.moving_block;
-      hold = st.hold;
-      current_orientation = st.current_orientation;
-      time = st.time;
-      queue = st.queue;
-      won = st.won;
-      dropped = st.dropped;
-      animate = st.animate;
-      rows_left = st.rows_left } in 
     erase_block (blockref_x st) (blockref_y st) st.current_orientation; new_shape
+
+(** [create_shape game st final_res] is a new state whose moving block has been 
+    randomly generated from the list of blocks in [game]*)
+let create_shape game st final_res = 
+  let (new_shape, new_queue) = pop st.queue game in 
+  {
+    blockref = st.blockref;
+    moving_block = Some new_shape;
+    hold = st.hold;
+    current_orientation = orientation_init new_shape;
+    time = time st;
+    queue = new_queue;
+    won = st.won;
+    dropped = st.dropped;
+    animate = st.animate;
+    rows_left = render_lines_remaining final_res.rows_left;
+  }
+
+(** [create_shape st final_res] is a new state whose moving block has been moved 
+    down one tile.*)
+let move_down st final_res= 
+  {
+    blockref = if (Unix.time ()) -. st.animate = 1. 
+      then add_blockref st 0 (-tilesize) 
+      else st.blockref;
+    moving_block = st.moving_block;
+    hold = st.hold;
+    current_orientation = st.current_orientation;
+    time = time st;
+    queue = st.queue;
+    won = (if st.rows_left = 0 then true else false);
+    dropped = st.dropped;
+    animate = if (Unix.time ()) -. st.animate = 1. 
+      then (Unix.time ()) 
+      else st.animate;
+    rows_left = render_lines_remaining final_res.rows_left;
+  }
 
 let update game st = 
   let final_res = row_remove st in
   update_after_row_rem final_res.dropped 0 0;
   let result = 
-    if st.moving_block = None then 
-      let (new_shape, new_queue) = pop st.queue game in 
-      {
-        blockref = st.blockref;
-        moving_block = Some new_shape;
-        hold = st.hold;
-        current_orientation = orientation_init new_shape;
-        time = time ();
-        queue = new_queue;
-        won = st.won;
-        dropped = st.dropped;
-        animate = st.animate;
-        rows_left = render_lines_remaining final_res.rows_left;
-      }
-    else (
-      {
-        blockref = if (Unix.time ()) -. st.animate = 1. 
-          then add_blockref st 0 (-tilesize) 
-          else st.blockref;
-        moving_block = st.moving_block;
-        hold = st.hold;
-        current_orientation = st.current_orientation;
-        time = time ();
-        queue = st.queue;
-        won = (if st.rows_left = 0 then true else false);
-        dropped = st.dropped;
-        animate = if (Unix.time ()) -. st.animate = 1. 
-          then (Unix.time ()) 
-          else st.animate;
-        rows_left = render_lines_remaining final_res.rows_left;
-      }) in 
+    if st.moving_block = None then create_shape game st final_res
+    else move_down st final_res in 
   let coords = orientation_coordinates st.current_orientation in
   let curr_col = curr_col st in 
   let (target_cell, y_target_coord) = parse_dropped st st.dropped coords curr_col in
@@ -574,7 +569,7 @@ let soft_drop st =
     moving_block = st.moving_block;
     hold = st.hold;
     current_orientation = st.current_orientation;
-    time = time ();
+    time = time st;
     queue = st.queue;
     won = st.won;
     dropped = st.dropped;

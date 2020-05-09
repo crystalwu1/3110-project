@@ -21,7 +21,6 @@ let handle_escape st game =
   | '[' -> begin 
       match input_char Stdlib.stdin with
       | 'A' -> rotate "clockwise" st game
-      (* | 'B' -> print_endline "Down" *)
       | 'C' -> move "right" st
       | 'D' -> move "left" st
       | _ -> raise NoKeyPress
@@ -57,7 +56,6 @@ let keyboard game st =
   else raise NoKeyPress
 
 let rec end_keyboard () =
-  print_endline "in end";
   let status = wait_next_event [Poll] in 
   if status.keypressed then
     (match read_key () with 

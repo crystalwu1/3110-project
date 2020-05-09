@@ -17,8 +17,35 @@ type t
     [lines] is the numbers of lines needed to win  *)
 val init_state : Game.t -> int -> t
 
+(** [moving_block st] is the currently moving block in the game.*)
+val moving_block : t -> Game.shape option
+
+(** [hold st] is the current hold block in the game.*)
+val hold : t -> Game.shape option
+
+(** [current_orientation st] is the current orientation of the moving block
+    in the game.*)
+val current_orientation : t -> Game.orientation option
+
+(** [time_st st] is the recorded time in [st]*)
+val time_st : t -> int
+
+(** [rows_left st] is the number of rows left to clear in [st]*)
+val rows_left : t -> int
+
+(** [queue st] is the queue of next blocks in [st]*)
+val queue : t -> Game.shape list
+
 (** [won st] is [true] when the game has been won, otherwise [false].*)
 val won : t -> bool
+
+(** [blockref_y st] is the y-coordinate of the render point of the currently
+    moving block in [st]. *)
+val blockref_y : t -> int
+
+(** [blockref_x st] is the x-coordinate of the render point of the currently
+    moving block in [st]. *)
+val blockref_x : t -> int
 
 (** [update game st] is [st] altered to handle the animation of the block 
     moving down, removing filled rows, and creating the shadow of the block

@@ -1,7 +1,7 @@
 open OUnit2
 open Yojson.Basic.Util
 open Game
-(* open Main *)
+open Graphics
 open State
 open Board
 
@@ -80,21 +80,34 @@ let command_tests = [
 
 ]
 
-(* let simple_game = "test.json" |>  Yojson.Basic.from_file |> parse
-   let st = update simple_game (init_state simple_game 1) *)
+let simple_game = "test.json" |>  Yojson.Basic.from_file |> parse
+let st = (init_state simple_game 1)
 
 
 let state_tests = [
-  (* "check that update on new game makes a new moving block" >::
-     (fun _ -> not(assert_equal (None) (st.moving_block)));
-     "check that on another call to update does not change the moving block" >::
-     (fun _ -> (assert_equal (st.moving_block) 
-               (let new_st = update simple_game st in new_st.moving_block)));
-     "test won on new game" >:: (fun _ -> (assert_equal (false) (won st)));
-     "test that time is incrementing" >:: (fun _ -> not(assert_equal (0) (st.time))); *)
+  "check that new game makes no block in moving block" >::
+  (fun _ -> (assert_equal (true) ((moving_block st) = None)));
+  "check that new game makes nothing in current orientation" >::
+  (fun _ -> (assert_equal (true) ((moving_block st) = None)));
+  "check that new game makes no block in hold block" >::
+  (fun _ -> (assert_equal (true) ((moving_block st) = None)));
+  "check that queue is intialized" >::
+  (fun _ -> (assert_equal (false) ((List.length (queue st)) = 0)));
+  "test won on new game" >:: (fun _ -> (assert_equal (false) (won st)));
+  "test that time is 0" >:: (fun _ -> (assert_equal (false) (time_st st = 0)));
+  "test that rows_left is still 1" >:: 
+  (fun _ -> (assert_equal (1) (rows_left st)));
+  "test that block_ref x initialized properly" >:: 
+  (fun _ -> (assert_equal (startx + (boardw/2)) (blockref_x st)));
+  "test that block_ref y initialized properly" >:: 
+  (fun _ -> (assert_equal (starty + boardh -tilesize) (blockref_y st)));
+  "check that update on new game makes a new moving block" >::
+  (fun _ -> (assert_equal (false) ((let update1 = update simple_game (init_state simple_game 1) in moving_block update1) = None)));
+  (* "check that on another call to update does not change the moving block" >::
+     (fun _ -> (assert_equal (moving_block st)
+               (let new_st = update simple_game st in (moving_block new_st)))); *)
 
 ]
-
 
 let suite =
   "Tetris test suite"  >::: List.flatten [
@@ -103,4 +116,4 @@ let suite =
     state_tests;
   ]
 
-let _ = run_test_tt_main suite
+let _ = make_window (); run_test_tt_main suite
