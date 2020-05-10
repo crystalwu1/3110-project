@@ -5,8 +5,6 @@ You can use the command [opam install graphics] to install the library.
 
 To play the game, enter the command [make play] in terminal.
 
-Make sure you are in the 3110-project directory.
-
 Controls:
 A- move left 
 S- soft drop
