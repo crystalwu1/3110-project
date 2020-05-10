@@ -1,9 +1,7 @@
-(** 
-   Representation of tetris game settings. This module will parse data stored
-   in the JSON files, load it, and allow querying. The data is information 
-   in game setting such as tile shape, color, and possible rotating positions.
-   This module was influenced by CS 3110 assignment A2/A3
-*)
+(** Representation of tetris game settings. This module will go through data stored
+    in the JSON files, load it, and allow querying. The data is information 
+    in game setting such as tile shape, color, and possible rotating positions.
+    This module was influenced by CS 3110 assignment A2/A3 *)
 
 (** type of orientation names *)
 type orientation_name = string

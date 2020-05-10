@@ -4,9 +4,13 @@ open Game
 
 (** the spawn point of the blocks. *)
 let orig_blockref = (startx + (boardw/2), starty + boardh -tilesize)
+
 (** Raised when there are no more blocks left in the queue. *)
 exception NoMoreBlocks
+
 exception GameWon
+
+exception GameLost
 
 type t = {
   blockref : int * int; 
@@ -25,7 +29,7 @@ let won st = st.won
 
 let moving_block st = st.moving_block
 
-let hold st = st.hold
+let hold_st st = st.hold
 
 let current_orientation st = st.current_orientation
 
@@ -34,6 +38,8 @@ let time_st st = st.time
 let queue st = st.queue
 
 let rows_left st = st.rows_left
+
+let dropped st = st.dropped
 
 (** [init_q length acc t] initializes a [Game.shape list] of random shapes 
     of length [length] including the list [acc] given game information in [t] *)
@@ -287,12 +293,14 @@ let row_remove st =
     rows_left = st.rows_left - new_rows_removed;
   }
 
+(** [leftmost_corrd acc lst] is the leftmost coordinate in the list *)
 let rec leftmost_coord acc lst = 
   match lst with
   | [] -> acc
   | (x,y)::t -> if x < acc 
     then leftmost_coord x t else leftmost_coord acc t
 
+(** [rightmost_corrd acc lst] is the rightmost coordinate in the list *)
 let rec rightmost_coord acc lst = 
   match lst with
   | [] -> acc
@@ -302,7 +310,7 @@ let rec rightmost_coord acc lst =
 let hold st = 
   erase_block (blockref_x st) (blockref_y st) st.current_orientation; 
   set_color black;
-  fill_rect 0 450 275 275;
+  fill_rect 0 400 250 275;
   render_block 100 500 (shape_color st.moving_block) st.current_orientation;
   let new_current_shape = {
     blockref = add_blockref st 0 0;
@@ -332,6 +340,18 @@ let display_win_message time =
   moveto 240 370;
   draw_string 
     ("Congratulations! You win! Your time is " ^ (string_of_int time) ^ ". Nice job.");
+  moveto 310 350;
+  draw_string ("Press 'y' to play again.")
+
+(** [display_lose_message] with erase the game board and display a
+    lose message and give the user the option to intialize a new game *)
+let display_lose_message () =
+  set_color black;
+  fill_rect 0 0 800 800;
+  set_color white;
+  moveto 352 370;
+  draw_string 
+    ("You lose!");
   moveto 310 350;
   draw_string ("Press 'y' to play again.")
 
@@ -422,9 +442,13 @@ let drop st =
   then final_res 
   else raise GameWon
 
-let rotate string st game = 
-  let new_shape = {
-    blockref = add_blockref st 0 0;
+(** [rotate_helper_left string st game] is [st] altered with the 
+    current orientation updated to be the next orientation of the block 
+    when the block is at the rightmost end of the screen and needs to be 
+    shifted left *)
+let rotate_helper_left string st game = 
+  let shifted_left_shape = {
+    blockref = add_blockref st (-tilesize) 0;
     moving_block = st.moving_block;
     hold = st.hold;
     time = st.time;
@@ -434,41 +458,38 @@ let rotate string st game =
     animate = st.animate;
     rows_left = st.rows_left;
     current_orientation = 
-      next_orientation string game st.moving_block st.current_orientation
-  } in 
+      next_orientation string game st.moving_block st.current_orientation } 
+  in erase_block (blockref_x st) (blockref_y st) st.current_orientation; 
+  shifted_left_shape
+
+(** [rotate_helper_right string st game] is [st] altered with the 
+    current orientation updated to be the next orientation of the block 
+    when the block is at the lefttmost end of the screen and needs to be 
+    shifted righr *)
+let rotate_helper_right string st game = 
+  let shifted_right_shape = {
+    blockref = add_blockref st tilesize 0;
+    moving_block = st.moving_block;
+    hold = st.hold;
+    time = st.time;
+    queue = st.queue;
+    won = st.won;
+    dropped = st.dropped;
+    animate = st.animate;
+    rows_left = st.rows_left;
+    current_orientation = 
+      next_orientation string game st.moving_block st.current_orientation } 
+  in erase_block (blockref_x st) (blockref_y st) st.current_orientation; 
+  shifted_right_shape
+
+let rotate string st game = 
   let pixel_list = convert_blk_to_pix_coor st 
-      (orientation_coordinates new_shape.current_orientation) [] in 
+      (orientation_coordinates st.current_orientation) [] in 
   if (leftmost_coord (blockref_x st) pixel_list) <= startx then  
-    let shifted_right_shape = {
-      blockref = add_blockref st tilesize 0;
-      moving_block = st.moving_block;
-      hold = st.hold;
-      time = st.time;
-      queue = st.queue;
-      won = st.won;
-      dropped = st.dropped;
-      animate = st.animate;
-      rows_left = st.rows_left;
-      current_orientation = 
-        next_orientation string game st.moving_block st.current_orientation } 
-    in erase_block (blockref_x st) (blockref_y st) st.current_orientation; 
-    shifted_right_shape
+    rotate_helper_right string st game
   else 
   if (rightmost_coord (blockref_x st) pixel_list) >= startx + boardw - tilesize then 
-    let shifted_left_shape = {
-      blockref = add_blockref st (-tilesize) 0;
-      moving_block = st.moving_block;
-      hold = st.hold;
-      time = st.time;
-      queue = st.queue;
-      won = st.won;
-      dropped = st.dropped;
-      animate = st.animate;
-      rows_left = st.rows_left;
-      current_orientation = 
-        next_orientation string game st.moving_block st.current_orientation } 
-    in erase_block (blockref_x st) (blockref_y st) st.current_orientation; 
-    shifted_left_shape
+    rotate_helper_left string st game
   else  let new_shape = {
       blockref = add_blockref st 0 0;
       moving_block = st.moving_block;
@@ -483,7 +504,6 @@ let rotate string st game =
         next_orientation string game st.moving_block st.current_orientation
     } in erase_block (blockref_x st) (blockref_y st) st.current_orientation; 
     new_shape
-
 
 let move direction st =
   let pixel_list = 
@@ -545,23 +565,27 @@ let move_down st final_res=
   }
 
 let update game st = 
-  let final_res = row_remove st in
-  update_after_row_rem final_res.dropped 0 0;
-  let result = 
-    if st.moving_block = None then create_shape game st final_res
-    else move_down st final_res in 
-  let coords = orientation_coordinates st.current_orientation in
-  let curr_col = curr_col st in 
-  let (target_cell, y_target_coord) = parse_dropped st st.dropped coords curr_col in
-  if (curr_row st) - 1 + y_target_coord <= target_cell then drop result else
-    (if (Unix.time ()) -. st.animate = 1. 
-     then erase_block (blockref_x st) (blockref_y st) st.current_orientation;
-     render_block (blockref_x st) (coord_to_pix "y" (target_cell + 1 - y_target_coord)) 
-       (darkgrey) st.current_orientation;
-     render_block (blockref_x result) (blockref_y result)
-       (shape_color st.moving_block) st.current_orientation; 
-     create_board ();
-     result)
+  try
+    let final_res = row_remove st in
+    update_after_row_rem final_res.dropped 0 0;
+    let result = 
+      if st.moving_block = None then create_shape game st final_res
+      else move_down st final_res in 
+    let coords = orientation_coordinates st.current_orientation in
+    let curr_col = curr_col st in 
+    let (target_cell, y_target_coord) = parse_dropped st st.dropped coords curr_col in
+    if (curr_row st) - 1 + y_target_coord <= target_cell then drop result else
+      (if (Unix.time ()) -. st.animate = 1. 
+       then erase_block (blockref_x st) (blockref_y st) st.current_orientation;
+       render_block (blockref_x st) (coord_to_pix "y" (target_cell + 1 - y_target_coord)) 
+         (darkgrey) st.current_orientation;
+       render_block (blockref_x result) (blockref_y result)
+         (shape_color st.moving_block) st.current_orientation; 
+       create_board ();
+       result)
+  with 
+  | Invalid_argument s ->
+    display_lose_message (); raise GameLost
 
 let soft_drop st = 
   {

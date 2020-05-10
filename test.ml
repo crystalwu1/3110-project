@@ -66,12 +66,12 @@ let game_tests = [
   "check name of first shape in pentris" >:: 
   (fun _ -> assert_equal "long" pshp_name);
   "check name of first shape's first orientation name in pentris" >:: 
-  (fun _ -> assert_equal "left" pfst_oname);
-  "check first x coordinate in pentris" >:: (fun _ -> assert_equal 0 pfst_x);
-  "check first y coordinate in pentris" >:: (fun _ -> assert_equal 2 pfst_y);
+  (fun _ -> assert_equal "bottom" pfst_oname);
+  "check first x coordinate in pentris" >:: (fun _ -> assert_equal (-2) pfst_x);
+  "check first y coordinate in pentris" >:: (fun _ -> assert_equal 1 pfst_y);
   "check orientation initialization in pentris" >:: 
   (fun _ -> assert_equal pinit_orient (Some pfst_ori));
-  "check shape height in pentris" >:: (fun _ -> assert_equal pheight 5);
+  "check shape height in pentris" >:: (fun _ -> assert_equal pheight 1);
   "check next orientation in pentris" >:: 
   (fun _ -> assert_equal pnext_orientatio pexpected_next_orientation);
 ]
@@ -80,7 +80,7 @@ let command_tests = [
 
 ]
 
-let simple_game = "test.json" |>  Yojson.Basic.from_file |> parse
+let simple_game = "tetris.json" |>  Yojson.Basic.from_file |> parse
 let st = (init_state simple_game 1)
 
 
@@ -90,7 +90,7 @@ let state_tests = [
   "check that new game makes nothing in current orientation" >::
   (fun _ -> (assert_equal (true) ((moving_block st) = None)));
   "check that new game makes no block in hold block" >::
-  (fun _ -> (assert_equal (true) ((moving_block st) = None)));
+  (fun _ -> (assert_equal (true) ((hold_st st) = None)));
   "check that queue is intialized" >::
   (fun _ -> (assert_equal (false) ((List.length (queue st)) = 0)));
   "test won on new game" >:: (fun _ -> (assert_equal (false) (won st)));
@@ -101,12 +101,108 @@ let state_tests = [
   (fun _ -> (assert_equal (startx + (boardw/2)) (blockref_x st)));
   "test that block_ref y initialized properly" >:: 
   (fun _ -> (assert_equal (starty + boardh -tilesize) (blockref_y st)));
-  "check that update on new game makes a new moving block" >::
-  (fun _ -> (assert_equal (false) ((let update1 = update simple_game (init_state simple_game 1) in moving_block update1) = None)));
-  (* "check that on another call to update does not change the moving block" >::
-     (fun _ -> (assert_equal (moving_block st)
-               (let new_st = update simple_game st in (moving_block new_st)))); *)
 
+  "check that update on new game makes a new moving block" >::
+  (fun _ -> (assert_equal (false) ((let update1 = update simple_game (init_state simple_game 1) 
+                                    in moving_block update1) = None)));
+  "check that update on new game doesn't change win state" >::
+  (fun _ -> (assert_equal (false) ((let update1 = update simple_game (init_state simple_game 1) 
+                                    in won update1))));
+  "test that rows_left is still 1 after update" >:: 
+  (fun _ -> (assert_equal (1) 
+               (let update1 = update simple_game (init_state simple_game 1) in rows_left update1)));
+  "test that block_ref x not changed after update" >:: 
+  (fun _ -> (assert_equal (startx + (boardw/2)) 
+               (let update1 = update simple_game (init_state simple_game 1) in blockref_x update1)));
+  "test that block_ref y not changed after update" >:: 
+  (fun _ -> (assert_equal (starty + boardh -tilesize) 
+               (let update1 = update simple_game (init_state simple_game 1) in blockref_y update1)));
+
+  "check that on another call to update does not change the moving block" >::
+  (fun _ -> (assert_equal (let update1 = update simple_game st in 
+                           (moving_block (update simple_game update1)))
+               (let update1 = update simple_game st in (moving_block update1))));
+  "check that on another call to update does not change the hold block" >::
+  (fun _ -> (assert_equal (let update1 = update simple_game st in 
+                           (hold_st (update simple_game update1)))
+               (let update1 = update simple_game st in (hold_st update1))));
+  "check that on another call to update does not change the win state" >::
+  (fun _ -> (assert_equal (let update1 = update simple_game st in 
+                           (won (update simple_game update1)))
+               (let update1 = update simple_game st in (won update1))));
+
+  "check that a call to hold alters the state" >::
+  (fun _ -> (assert_equal (false) ((update simple_game st) = 
+                                   (let update1 = update simple_game st in 
+                                    ((hold update1))))));
+  "check that a call to hold moves moving block to hold block" >::
+  (fun _ -> (assert_equal (let update1 = update simple_game st in 
+                           (moving_block (update1))) 
+               (let update1 = update simple_game st in (hold_st (hold update1)))));
+  "check that two calls to hold does not alter the state" >::
+  (fun _ -> (assert_equal (let update1 = update simple_game st in 
+                           (hold_st (update1))) (let update1 = update simple_game st in 
+                                                 (hold_st (hold (hold update1))))));
+
+  "check that a call to rotate alters the state" >::
+  (fun _ -> (assert_equal (false) ((update simple_game st) = 
+                                   (let update1 = update simple_game st in 
+                                    ((rotate "clockwise" update1 simple_game))))));
+  "check that on a call to rotate cw does not change the moving block" >::
+  (fun _ -> (assert_equal (let update1 = update simple_game st in 
+                           (moving_block (rotate "clockwise" update1 simple_game)))
+               (let update1 = update simple_game st in (moving_block update1))));
+  "check that on a call to rotate ccw does not change the moving block" >::
+  (fun _ -> (assert_equal (let update1 = update simple_game st in 
+                           (moving_block (rotate "counterclockwise" update1 simple_game)))
+               (let update1 = update simple_game st in (moving_block update1))));
+  "check that a call to drop does not alter hold block" >::
+  (fun _ -> (assert_equal (let update1 = update simple_game st in 
+                           (hold_st (rotate "clockwise" update1 simple_game)))
+               (let update1 = update simple_game st in (hold_st update1))));
+
+  "check that a call to move alters the state" >::
+  (fun _ -> (assert_equal (false) ((update simple_game st) = 
+                                   (let update1 = update simple_game st in 
+                                    ((hold update1))))));
+  "check that on a call to move left does not change the moving block" >::
+  (fun _ -> (assert_equal (let update1 = update simple_game st in 
+                           (moving_block (move "left" update1)))
+               (let update1 = update simple_game st in (moving_block update1))));
+  "check that on a call to move right does not change the moving block" >::
+  (fun _ -> (assert_equal (let update1 = update simple_game st in 
+                           (moving_block (move "right" update1)))
+               (let update1 = update simple_game st in (moving_block update1))));
+  "check that a call to drop does not alter hold block" >::
+  (fun _ -> (assert_equal (let update1 = update simple_game st in 
+                           (hold_st (move "left" update1)))
+               (let update1 = update simple_game st in (hold_st update1))));
+
+  "check that a call to soft drop alters the state" >::
+  (fun _ -> (assert_equal (false) ((update simple_game st) = 
+                                   (let update1 = update simple_game st in 
+                                    ((hold update1))))));
+  "check that on a call to soft drop does not change the moving block" >::
+  (fun _ -> (assert_equal (let update1 = update simple_game st in 
+                           (moving_block (soft_drop update1)))
+               (let update1 = update simple_game st in (moving_block update1))));
+  "check that a call to drop does not alter hold block" >::
+  (fun _ -> (assert_equal (let update1 = update simple_game st in 
+                           (hold_st (soft_drop update1)))
+               (let update1 = update simple_game st in (hold_st update1))));
+
+  "check that a call to drop alters the state" >::
+  (fun _ -> (assert_equal (false) ((update simple_game st) = 
+                                   (let update1 = update simple_game st in 
+                                    ((hold update1))))));
+  "check that a call to drop alters the moving block" >::
+  (fun _ -> (assert_equal (false) (moving_block (update simple_game st) = 
+                                   (let update1 = update simple_game st in 
+                                    (moving_block (hold update1))))));
+  "check that a call to drop does not alter hold block" >::
+  (fun _ -> (assert_equal (let update1 = update simple_game st in 
+                           (hold_st (drop update1)))
+               (let update1 = update simple_game st in (hold_st update1))));
 ]
 
 let suite =
