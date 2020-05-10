@@ -9,6 +9,9 @@ Make sure you are in the 3110-project directory.
 
 Controls:
 A- move left 
-S- hard drop
+S- soft drop
 D- move right
 W- rotate 
+C- hold
+Space- hard drop
+When prompted: Y- play again
