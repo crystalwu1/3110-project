@@ -1,12 +1,12 @@
-(** Representation of tetris game settings. This module will go through data stored
+(** Representation of Tetris game settings. This module will go through data stored
     in the JSON files, load it, and allow querying. The data is information 
     in game setting such as tile shape, color, and possible rotating positions.
     This module was influenced by CS 3110 assignment A2/A3 *)
 
-(** type of orientation names *)
+(** The type of orientation names *)
 type orientation_name = string
 
-(** type of shape names *)
+(** The type of shape names *)
 type shape_name = string
 
 (** The type of a coordinate *)
@@ -18,11 +18,11 @@ type orientation
 (** The type of a shape *)
 type shape
 
-(** abstract type of values representing a tetris game. *)
+(** The abstract type of values representing a tetris game. *)
 type t
 
 (** [parse j] is a record of a tetris game from [j]
-    Raises [Type_error] when [j] is a wrong type of json element] *)
+    Raises [Type_error] when [j] is a wrong type of json element *)
 val parse : Yojson.Basic.t -> t
 
 (** [get_shapes j] is the [shape] list from [j] *)

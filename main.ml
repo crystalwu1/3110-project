@@ -4,9 +4,11 @@ open Game
 open State
 open Command
 
+(** Raised when there an invalid file is inputted *)
 exception InvalidFile
-exception InvalidLineNum
 
+(** Raised when there an invalid number of lines is inputted *)
+exception InvalidLineNum
 
 (** [run_game game lines st] runs the game from the original game file 
     [game], the number of lines to be cleared to win [lines], and the 

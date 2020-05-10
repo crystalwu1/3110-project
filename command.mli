@@ -1,8 +1,7 @@
-open Graphics
-open Board
-open Game
-open State
-open Unix
+(**
+   Interprets and executes player's commands 
+*)
+
 
 (** The exception that is thrown when the user does not input a commant.*)
 exception NoKeyPress
@@ -15,7 +14,7 @@ exception GameOver
     to modify the current state [st] given the game file [game] *)
 val keyboard : Game.t -> State.t -> (State.t)
 
-(** [end_keyboard ()] is [true] is the user has indicated that 
+(** [end_keyboard ()] is [true] if the user has indicated that 
     they want to play another game, and [false] otherwise *)
 val end_keyboard : unit -> bool
 

@@ -293,14 +293,14 @@ let row_remove st =
     rows_left = st.rows_left - new_rows_removed;
   }
 
-(** [leftmost_corrd acc lst] is the leftmost coordinate in the list *)
+(** [leftmost_corrd acc lst] is [acc] the leftmost coordinate in the list [lst] *)
 let rec leftmost_coord acc lst = 
   match lst with
   | [] -> acc
   | (x,y)::t -> if x < acc 
     then leftmost_coord x t else leftmost_coord acc t
 
-(** [rightmost_corrd acc lst] is the rightmost coordinate in the list *)
+(** [rightmost_corrd acc lst] is [acc] the rightmost coordinate in the list [lst] *)
 let rec rightmost_coord acc lst = 
   match lst with
   | [] -> acc
@@ -339,7 +339,7 @@ let display_win_message time =
   set_color white;
   moveto 240 370;
   draw_string 
-    ("Congratulations! You win! Your time is " ^ (string_of_int time) ^ ". Nice job.");
+    ("Congratulations! You win! Your time is "^(string_of_int time)^". Nice job.");
   moveto 310 350;
   draw_string ("Press 'y' to play again.")
 
@@ -411,7 +411,7 @@ let rec update_after_row_rem drop x y  =
     if y > 18 then () else update_after_row_rem drop 0 (y+1)
   else update_after_row_rem drop (x+1) y
 
-(** [new_st st] is a state of type [t] that removes the moving block and resets
+(** [new_st st] is state [st] altered that removes the moving block and resets
     its render point to the original value. *)
 let new_st st= 
   {
@@ -444,8 +444,8 @@ let drop st =
 
 (** [rotate_helper_left string st game] is [st] altered with the 
     current orientation updated to be the next orientation of the block 
-    when the block is at the rightmost end of the screen and needs to be 
-    shifted left *)
+    determined by whichever direction [string] the user types when the 
+    block is at the rightmost end of the screen in the game [game] *)
 let rotate_helper_left string st game = 
   let shifted_left_shape = {
     blockref = add_blockref st (-tilesize) 0;
@@ -463,9 +463,9 @@ let rotate_helper_left string st game =
   shifted_left_shape
 
 (** [rotate_helper_right string st game] is [st] altered with the 
-    current orientation updated to be the next orientation of the block 
-    when the block is at the lefttmost end of the screen and needs to be 
-    shifted righr *)
+    current orientation updated to be the next orientation of the block determined 
+    by whichever direction [string] the user types when the block is at the 
+    leftmost end of the screen in the game [game] *)
 let rotate_helper_right string st game = 
   let shifted_right_shape = {
     blockref = add_blockref st tilesize 0;
@@ -486,10 +486,9 @@ let rotate string st game =
   let pixel_list = convert_blk_to_pix_coor st 
       (orientation_coordinates st.current_orientation) [] in 
   if (leftmost_coord (blockref_x st) pixel_list) <= startx then  
-    rotate_helper_right string st game
-  else 
-  if (rightmost_coord (blockref_x st) pixel_list) >= startx + boardw - tilesize then 
-    rotate_helper_left string st game
+    rotate_helper_right string st game else 
+  if (rightmost_coord (blockref_x st) pixel_list) >= startx + boardw - tilesize 
+  then rotate_helper_left string st game
   else  let new_shape = {
       blockref = add_blockref st 0 0;
       moving_block = st.moving_block;
@@ -507,10 +506,12 @@ let rotate string st game =
 
 let move direction st =
   let pixel_list = 
-    convert_blk_to_pix_coor st (orientation_coordinates st.current_orientation) [] in 
+    convert_blk_to_pix_coor st 
+      (orientation_coordinates st.current_orientation) [] in 
   if ((leftmost_coord (blockref_x st) (pixel_list)) <= startx 
       && direction = "left") then st
-  else if (rightmost_coord (blockref_x st) (pixel_list)) >= (startx+boardw) - tilesize  
+  else if (rightmost_coord (blockref_x st) (pixel_list)) 
+          >= (startx+boardw) - tilesize  
        && direction = "right" 
   then st else 
     let new_shape = {
@@ -528,7 +529,9 @@ let move direction st =
     erase_block (blockref_x st) (blockref_y st) st.current_orientation; new_shape
 
 (** [create_shape game st final_res] is a new state whose moving block has been 
-    randomly generated from the list of blocks in [game]*)
+    randomly generated from the list of blocks in [game], [final_res] is the 
+    state with the proper number of rows
+    remaining.*)
 let create_shape game st final_res = 
   let (new_shape, new_queue) = pop st.queue game in 
   {
@@ -544,8 +547,9 @@ let create_shape game st final_res =
     rows_left = render_lines_remaining final_res.rows_left;
   }
 
-(** [create_shape st final_res] is a new state whose moving block has been moved 
-    down one tile.*)
+(** [create_shape st final_res] is a [st] altered whose moving block has been moved 
+    down one tile. [final_res] is the state with the proper number of rows
+    remaining.*)
 let move_down st final_res= 
   {
     blockref = if (Unix.time ()) -. st.animate = 1. 
@@ -573,11 +577,13 @@ let update game st =
       else move_down st final_res in 
     let coords = orientation_coordinates st.current_orientation in
     let curr_col = curr_col st in 
-    let (target_cell, y_target_coord) = parse_dropped st st.dropped coords curr_col in
+    let (target_cell, y_target_coord) = 
+      parse_dropped st st.dropped coords curr_col in
     if (curr_row st) - 1 + y_target_coord <= target_cell then drop result else
       (if (Unix.time ()) -. st.animate = 1. 
        then erase_block (blockref_x st) (blockref_y st) st.current_orientation;
-       render_block (blockref_x st) (coord_to_pix "y" (target_cell + 1 - y_target_coord)) 
+       render_block (blockref_x st) 
+         (coord_to_pix "y" (target_cell + 1 - y_target_coord)) 
          (darkgrey) st.current_orientation;
        render_block (blockref_x result) (blockref_y result)
          (shape_color st.moving_block) st.current_orientation; 
@@ -597,7 +603,7 @@ let soft_drop st =
     queue = st.queue;
     won = st.won;
     dropped = st.dropped;
-    animate = 0.;
+    animate = st.animate;
     rows_left = st.rows_left;
   }
 

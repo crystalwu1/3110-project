@@ -33,14 +33,16 @@ let coordinates_of_json j = {
 (** [orientation_of_json j] is a record of an orientation from [j] *)
 let orientation_of_json j = {
   orient_name = j |> member "oname" |> to_string;
-  coordinates = j |> member "coordinates" |> to_list |> List.map coordinates_of_json;
+  coordinates = 
+    j |> member "coordinates" |> to_list |> List.map coordinates_of_json;
 }
 
 (** [shape_of_json j] is a record of a shape from [j] *)
 let shape_of_json j = {
   shape_name = j |> member "name" |> to_string;
   color = j |> member "color" |> to_string |> int_of_string;
-  orientations = j |> member "orientations" |> to_list |> List.map orientation_of_json;
+  orientations = 
+    j |> member "orientations" |> to_list |> List.map orientation_of_json;
 }
 
 (** [game_of_json j] is a record of a tetris game from [j] *)

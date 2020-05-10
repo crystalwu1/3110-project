@@ -21,26 +21,26 @@ type t
     [lines] is the numbers of lines needed to win  *)
 val init_state : Game.t -> int -> t
 
-(** [moving_block st] is the currently moving block in the game.*)
+(** [moving_block st] is the currently moving block in the state [st].*)
 val moving_block : t -> Game.shape option
 
-(** [hold st] is the current hold block in the game.*)
+(** [hold st] is the current hold block in the game state [st].*)
 val hold_st : t -> Game.shape option
 
 (** [current_orientation st] is the current orientation of the moving block
-    in the game.*)
+    in the game at state [st].*)
 val current_orientation : t -> Game.orientation option
 
-(** [time_st st] is the recorded time in [st]*)
+(** [time_st st] is the recorded time in state [st]*)
 val time_st : t -> int
 
-(** [rows_left st] is the number of rows left to clear in [st]*)
+(** [rows_left st] is the number of rows left to clear in state [st]*)
 val rows_left : t -> int
 
-(** [queue st] is the queue of next blocks in [st]*)
+(** [queue st] is the queue of next blocks in state [st]*)
 val queue : t -> Game.shape list
 
-(** [won st] is [true] when the game has been won, otherwise [false].*)
+(** [won st] is [true] when the game at state [st] has been won, otherwise [false].*)
 val won : t -> bool
 
 (** [dropped st] is the array of dropped blocks in [st].*)
@@ -66,12 +66,12 @@ val update : Game.t -> t -> t
 val hold : t -> t
 
 (** [rotate string st game] is [st] altered with the current orientation
-    updated to be the next orientation of the block in whichever direction
-    the user types; clockwise or counterclockwise *)
+    updated to be the next orientation of the block in whichever direction [string]
+    the user types in the game [game]; clockwise or counterclockwise *)
 val rotate : string -> t -> Game.t -> t
 
 (** [move direction st] is [st] altered with the blockref updated in 
-    whichever direction the user types; left or right *)
+    whichever direction [direction] the user inputs *)
 val move : string -> t -> t
 
 (** [drop st] is [st] altered with the currently moving block dropped into the 

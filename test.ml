@@ -1,3 +1,15 @@
+(** Test Plan:
+    We test the Game and State modules in Ounit (automated testing). We did not 
+    test the Board and Command modules because we are able to test these modules 
+    by playing the game (manual testing). 
+    We used glass box testing since we knew what the outputs were and knew what 
+    the implementation of our game was. 
+    This test approach demonstrates the correctness of the system because we
+    are checking to see how the different components of the game were changed 
+    with different commands. We ensured that the inner workings of our 
+    game were correct with glass box testing.
+*)
+
 open OUnit2
 open Yojson.Basic.Util
 open Game
@@ -51,7 +63,8 @@ let pexpected_next_orientation = Some (head_of pshp_oris true)
 let game_tests = [
   "check color of first shape in tetris" >:: 
   (fun _ -> assert_equal (int_of_string("0x0F9AD7")) shp_color);
-  "check name of first shape in tetris" >:: (fun _ -> assert_equal "long" shp_name);
+  "check name of first shape in tetris" >:: 
+  (fun _ -> assert_equal "long" shp_name);
   "check name of first shape's first orientation name in tetris" >:: 
   (fun _ -> assert_equal "orientation1" fst_oname);
   "check first x coordinate in tetris" >:: (fun _ -> assert_equal (-2) fst_x);
@@ -74,10 +87,6 @@ let game_tests = [
   "check shape height in pentris" >:: (fun _ -> assert_equal pheight 1);
   "check next orientation in pentris" >:: 
   (fun _ -> assert_equal pnext_orientatio pexpected_next_orientation);
-]
-
-let command_tests = [
-
 ]
 
 let simple_game = "tetris.json" |>  Yojson.Basic.from_file |> parse
@@ -103,20 +112,25 @@ let state_tests = [
   (fun _ -> (assert_equal (starty + boardh -tilesize) (blockref_y st)));
 
   "check that update on new game makes a new moving block" >::
-  (fun _ -> (assert_equal (false) ((let update1 = update simple_game (init_state simple_game 1) 
-                                    in moving_block update1) = None)));
+  (fun _ -> (assert_equal (false) 
+               ((let update1 = update simple_game (init_state simple_game 1) 
+                 in moving_block update1) = None)));
   "check that update on new game doesn't change win state" >::
-  (fun _ -> (assert_equal (false) ((let update1 = update simple_game (init_state simple_game 1) 
-                                    in won update1))));
+  (fun _ -> (assert_equal (false) 
+               ((let update1 = update simple_game (init_state simple_game 1) 
+                 in won update1))));
   "test that rows_left is still 1 after update" >:: 
   (fun _ -> (assert_equal (1) 
-               (let update1 = update simple_game (init_state simple_game 1) in rows_left update1)));
+               (let update1 = update simple_game (init_state simple_game 1) in 
+                rows_left update1)));
   "test that block_ref x not changed after update" >:: 
   (fun _ -> (assert_equal (startx + (boardw/2)) 
-               (let update1 = update simple_game (init_state simple_game 1) in blockref_x update1)));
+               (let update1 = update simple_game (init_state simple_game 1) in 
+                blockref_x update1)));
   "test that block_ref y not changed after update" >:: 
   (fun _ -> (assert_equal (starty + boardh -tilesize) 
-               (let update1 = update simple_game (init_state simple_game 1) in blockref_y update1)));
+               (let update1 = update simple_game (init_state simple_game 1) in 
+                blockref_y update1)));
 
   "check that on another call to update does not change the moving block" >::
   (fun _ -> (assert_equal (let update1 = update simple_game st in 
@@ -141,8 +155,9 @@ let state_tests = [
                (let update1 = update simple_game st in (hold_st (hold update1)))));
   "check that two calls to hold does not alter the state" >::
   (fun _ -> (assert_equal (let update1 = update simple_game st in 
-                           (hold_st (update1))) (let update1 = update simple_game st in 
-                                                 (hold_st (hold (hold update1))))));
+                           (hold_st (update1))) 
+               (let update1 = update simple_game st in 
+                (hold_st (hold (hold update1))))));
 
   "check that a call to rotate alters the state" >::
   (fun _ -> (assert_equal (false) ((update simple_game st) = 
@@ -154,7 +169,8 @@ let state_tests = [
                (let update1 = update simple_game st in (moving_block update1))));
   "check that on a call to rotate ccw does not change the moving block" >::
   (fun _ -> (assert_equal (let update1 = update simple_game st in 
-                           (moving_block (rotate "counterclockwise" update1 simple_game)))
+                           (moving_block 
+                              (rotate "counterclockwise" update1 simple_game)))
                (let update1 = update simple_game st in (moving_block update1))));
   "check that a call to drop does not alter hold block" >::
   (fun _ -> (assert_equal (let update1 = update simple_game st in 
@@ -208,7 +224,6 @@ let state_tests = [
 let suite =
   "Tetris test suite"  >::: List.flatten [
     game_tests;
-    command_tests;
     state_tests;
   ]
 
